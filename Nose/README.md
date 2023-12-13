@@ -17,6 +17,7 @@
 - MCP25625
 #### Component
 ##### Capacitor
+- [100uF16V 電解コン](https://akizukidenshi.com/catalog/g/gP-05002/)
 - [100uF10V 3216](https://akizukidenshi.com/catalog/g/gP-15633/)
 - [1uF25V 1608](https://akizukidenshi.com/catalog/g/gP-14526/)
 - [0.01uF50V 1608](https://akizukidenshi.com/catalog/g/gP-13387/)
