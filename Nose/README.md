@@ -21,7 +21,7 @@
 - [100uF10V 3216](https://akizukidenshi.com/catalog/g/gP-15633/)
 - [1uF25V 1608](https://akizukidenshi.com/catalog/g/gP-14526/)
 - [0.01uF50V 1608](https://akizukidenshi.com/catalog/g/gP-13387/)
-- [470uF50V 1608](https://akizukidenshi.com/catalog/g/gP-09268/)
+- [470pF50V 1608](https://akizukidenshi.com/catalog/g/gP-09268/)
 ##### Resisiter
 - [100k 1/10W 1608](https://akizukidenshi.com/catalog/g/gR-11792/)
 - [49.9k 1/10W 1608](https://akizukidenshi.com/catalog/g/gR-11804/)
