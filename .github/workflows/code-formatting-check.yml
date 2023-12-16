@@ -1,0 +1,28 @@
+name: Arduino Code Format Check
+
+on:
+  push:
+    paths:
+      - '**/*.ino'
+  pull_request:
+    paths:
+      - '**/*.ino'
+
+jobs:
+  check-format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Arduino CLI
+      uses: arduino/setup-arduino-cli@v1
+
+    - name: Check Arduino Code Format
+      run: |
+        arduino-cli config init
+        arduino-cli core update-index
+        # Find all .ino files and check their format
+        find . -name '*.ino' -exec echo "Checking format of {}" \;
+        # Replace the echo command with the actual format checking command
