@@ -55,3 +55,11 @@ jobs:
             echo "Arduino Web Editor: Ctrl + B"
             exit 1
           fi
+
+      - name: Install Reviewdog
+        run: |
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
+          
+      - name: Run Reviewdog
+        run: |
+          git diff | reviewdog -f=diff -name=reviewdog -reporter=github-pr-review
