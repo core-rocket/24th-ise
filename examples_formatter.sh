@@ -4,7 +4,6 @@ if ! which clang-format &>/dev/null; then
 fi
 
 find \
-  examples \
   \( \
     -name '*.c' -or \
     -name '*.cpp' -or \
