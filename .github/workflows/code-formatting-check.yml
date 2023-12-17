@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Reviewdog
         run: |
-          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b {{ env.REVIEWDOG_INSTALL_PATH }}
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b ${{ env.REVIEWDOG_INSTALL_PATH }}
           
           echo "${{ env.REVIEWDOG_INSTALL_PATH }}" >> "$GITHUB_PATH"
 
