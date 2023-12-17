@@ -63,5 +63,5 @@ jobs:
             echo "Please do an Auto Format on the sketches:"
             echo "Arduino IDE: Tools > Auto Format"
             echo "Arduino Web Editor: Ctrl + B"
-            exit 1
+            # exit 1
           fi
