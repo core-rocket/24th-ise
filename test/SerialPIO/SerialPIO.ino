@@ -7,12 +7,12 @@ void setup() {
 
 void loop() {
   if (Serial.available()) {
-    char c = (char)Serial.read();
+    char c = Serial.read();
       mySerial.write(c);
   }
 
   if (mySerial.available()) {
-    char c = (char)mySerial.read();
+    char c = mySerial.read();
     Serial.write(c);
   }
 }
