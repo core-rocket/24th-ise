@@ -21,6 +21,7 @@ jobs:
         run: |
           # See: https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
           echo "CLANG_FORMAT_INSTALL_PATH=${{ runner.temp }}/clang-format" >> "$GITHUB_ENV"
+          echo "REVIEWDOG_INSTALL_PATH=${{ runner.temp }}/reviewdog" >> "$GITHUB_ENV"
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,7 +50,9 @@ jobs:
 
       - name: Install Reviewdog
         run: |
-          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b {{ env.REVIEWDOG_INSTALL_PATH }}
+          
+          echo "${{ env.REVIEWDOG_INSTALL_PATH }}" >> "$GITHUB_PATH"
 
       - name: Check formatting
         run: |
