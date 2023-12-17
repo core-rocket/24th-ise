@@ -2,11 +2,6 @@ name: Code Formatting Check
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/code-formatting-check.yml"
-      - ".clang-format"
-      - "examples_formatter.sh"
-      - "examples/**"
 
 jobs:
   check-formatting:
@@ -45,8 +40,23 @@ jobs:
 
       - name: Format examples
         run: |
-          chmod +x ./examples_formatter.sh
-          ./examples_formatter.sh
+          find \
+            \( \
+              -name '*.c' -or \
+              -name '*.cpp' -or \
+              -name '*.h' -or \
+              -name '*.ino' -or \
+              -name '*.ipp' -or \
+              -name '*.tpp' \
+            \) \
+            -type f \
+            -exec \
+              clang-format \
+                --assume-filename=foo.cpp \
+                -i \
+                --style=file \
+                {} \;
+
 
       - name: Install Reviewdog
         run: |
