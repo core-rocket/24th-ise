@@ -47,19 +47,16 @@ jobs:
           chmod +x ./examples_formatter.sh
           ./examples_formatter.sh
 
+      - name: Install Reviewdog
+        run: |
+          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
+
       - name: Check formatting
         run: |
           if ! git diff --color --exit-code; then
+            git diff | reviewdog -f=diff -name="format-check" -reporter=github-pr-review
             echo "Please do an Auto Format on the sketches:"
             echo "Arduino IDE: Tools > Auto Format"
             echo "Arduino Web Editor: Ctrl + B"
             exit 1
           fi
-
-      - name: Install Reviewdog
-        run: |
-          wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh| sh -s
-          
-      - name: Run Reviewdog
-        run: |
-          git diff | reviewdog -f=diff -name=reviewdog -reporter=github-pr-review
