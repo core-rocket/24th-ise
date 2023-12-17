@@ -9,9 +9,9 @@ void loop() {
   if (Serial.available()) {
     char c = Serial.read();
     mySerial.write(c);
-    }
+  }
 
-    if (mySerial.available()) {
+  if (mySerial.available()) {
     char c = mySerial.read();
     Serial.write(c);
   }
