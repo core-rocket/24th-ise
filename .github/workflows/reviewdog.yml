@@ -91,3 +91,60 @@ jobs:
           ,-whitespace/operators\
           ,-whitespace/parens\
           " # Optional
+
+  build:
+    name: ${{ matrix.board.fqbn }}
+    runs-on: ubuntu-latest
+
+    env:
+      UNIVERSAL_LIBRARIES: |
+        - name: Servo
+
+      UNIVERSAL_SKETCH_PATHS: |
+        - ""
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          - fqbn: arduino:avr:uno
+            main: true
+            valve: false
+          - fqbn: arduino:avr:nano
+            main: true
+            valve: false
+        include:
+          - board:
+              main: true
+            main-libraries: |
+              - name: Keyboard
+              - name: Mouse
+            main-sketch-paths: |
+              - main/main
+          - board:
+              main: false
+            main-sketch-paths: ""
+          - board:
+              valve: true
+            serial1-sketch-paths: |
+              - valve/valve
+          - board:
+              valve: false
+            valve-sketch-paths: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          libraries: |
+            ${{ env.UNIVERSAL_LIBRARIES }}
+            ${{ matrix.main-libraries }}
+          sketch-paths: |
+            ${{ env.UNIVERSAL_SKETCH_PATHS }}
+            ${{ matrix.main-sketch-paths }}
+            ${{ matrix.valve-sketch-paths }}
