@@ -96,6 +96,10 @@ jobs:
     name: ${{ matrix.code.source }}
     runs-on: ubuntu-latest
 
+    env:
+      UNIVERSAL_LIBRARIES: |
+        - name: Servo
+
     strategy:
       fail-fast: false
 
@@ -140,6 +144,7 @@ jobs:
             - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
               source-url: ${{matrix.index}}
           libraries: |
+            ${{ env.UNIVERSAL_LIBRARIES }}
             ${{ matrix.code.libraries }}
           sketch-paths: |
             ${{ matrix.code.sketch-paths }}
