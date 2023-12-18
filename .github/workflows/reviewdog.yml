@@ -110,9 +110,7 @@ jobs:
         code:
           - source: main
             libraries: |
-              - name: Adafruit BusIO
-              - name: Adafruit Unified Sensor
-              - name: Adafruit BME280 Library
+              - name: Servo
             sketch-paths: |
               - Main
             target: rpipico
