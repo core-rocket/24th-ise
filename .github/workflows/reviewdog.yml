@@ -113,26 +113,26 @@ jobs:
               - name: Servo
             sketch-paths: |
               - Main
-            target: rpipico
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: rpipico
+            
           - source: valve
             libraries: |
               - name: Servo
             sketch-paths: |
               - Valve
-            target: seeed_xiao_rp2040
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: rpipico
 
         include:
           - code:
-              - target: rpipico
-            vendor: rp2040
-            arch: rp2040
-            name: rpipico
-            index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-          - code:
-              - target: seeed_xiao_rp2040
-            vendor: rp2040
-            arch: rp2040
-            name: seeed_xiao_rp2040
+              board:
+                vendor: rp2040
+                arch: rp2040   
             index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
     steps:
@@ -142,10 +142,10 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: rp2040:rp2040:rpipico
+          fqbn: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}:${{matrix.code.board.name}}
           platforms: |
-            - name: rp2040:rp2040
-              source-url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+            - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
+              source-url: ${{matrix.index}}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
