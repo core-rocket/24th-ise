@@ -163,14 +163,12 @@ SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
-# SpacesBeforeTrailingComments: 2
+SpacesBeforeTrailingComments: false
 SpacesInAngles: Leave
 SpacesInCStyleCastParentheses: false
 SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
-# SpacesInLineCommentPrefix:
-#  Minimum: 0
-#  Maximum: -1
+SpacesInLineCommentPrefix: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: Auto
