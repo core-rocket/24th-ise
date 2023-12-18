@@ -96,13 +96,6 @@ jobs:
     name: ${{ matrix.code.source }}
     runs-on: ubuntu-latest
 
-    env:
-      UNIVERSAL_LIBRARIES: |
-        - ""
-
-      UNIVERSAL_SKETCH_PATHS: |
-        - ""
-
     strategy:
       fail-fast: false
 
@@ -147,7 +140,5 @@ jobs:
             - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
               source-url: ${{matrix.index}}
           libraries: |
-            ${{ env.UNIVERSAL_LIBRARIES }}
-            ${{ env.UNIVERSAL_SKETCH_PATHS }}
             ${{ matrix.code.libraries }}
             ${{ matrix.code.sketch-paths }}
