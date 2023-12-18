@@ -73,3 +73,21 @@ jobs:
             echo "Arduino Web Editor: Ctrl + B"
             exit 1
           fi
+
+  cpplint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: reviewdog/action-cpplint@master
+      with:
+        github_token: ${{ secrets.github_token }}
+        reporter: github-pr-review
+        flags: --linelength=50 # Optional
+        filter: "-readability/braces\
+          ,-whitespace/braces\
+          ,-whitespace/comments\
+          ,-whitespace/indent\
+          ,-whitespace/newline\
+          ,-whitespace/operators\
+          ,-whitespace/parens\
+          " # Optional
