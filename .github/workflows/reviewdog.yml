@@ -119,8 +119,8 @@ jobs:
             valve: false
         include:
           - board:
-            index: "https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json"
-              vendor: adafruit
+              index: "https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json"
+                vendor: adafruit
           - board:
               main: true
             main-libraries: |
