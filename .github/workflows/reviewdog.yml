@@ -114,21 +114,27 @@ jobs:
           - fqbn: arduino:avr:nano
             main: true
             valve: false
+          - fqbn: adafruit:samd:arduino_zero_native
+            main: true
+            valve: false
         include:
+          - board:
+            index: "https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json"
+              vendor: adafruit
           - board:
               main: true
             main-libraries: |
               - name: Keyboard
               - name: Mouse
             main-sketch-paths: |
-              - main
+              - Main
           - board:
               main: false
             main-sketch-paths: ""
           - board:
               valve: true
             valve-sketch-paths: |
-              - "" 
+              - Valve
           - board:
               valve: false
             valve-sketch-paths: ""
@@ -144,6 +150,7 @@ jobs:
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
             ${{ matrix.main-libraries }}
+            ${{ matrix.valve-libraries }}
           sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
             ${{ matrix.main-sketch-paths }}
