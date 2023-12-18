@@ -1,4 +1,4 @@
-name: Code Formatting Check
+name: reviewdog
 
 on:
   pull_request:
