@@ -1,4 +1,4 @@
-name: Code Formatting Check
+name: Arduino CI
 
 on:
   pull_request:
@@ -73,3 +73,86 @@ jobs:
             echo "Arduino Web Editor: Ctrl + B"
             exit 1
           fi
+
+  cpplint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: reviewdog/action-cpplint@master
+      with:
+        github_token: ${{ secrets.github_token }}
+        reporter: github-pr-review
+        flags: --linelength=50 # Optional
+        filter: "-readability/braces\
+          ,-whitespace/braces\
+          ,-whitespace/comments\
+          ,-whitespace/indent\
+          ,-whitespace/newline\
+          ,-whitespace/operators\
+          ,-whitespace/parens\
+          " # Optional
+
+  build:
+    name: ${{ matrix.code.sketch-paths }}
+    runs-on: ubuntu-latest
+
+    env:
+      UNIVERSAL_LIBRARIES: |
+        - name: Servo
+          version: latest
+        - name: Adafruit BusIO
+          version: latest
+        - name: Adafruit Unified Sensor
+          version: latest
+        - name: Adafruit BME280 Library
+          version: latest
+        - name: Adafruit BNO055
+          version: latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        code:
+          - sketch-paths: Main
+            libraries: |
+              - 
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: rpipico
+            
+          - sketch-paths: Valve
+            libraries: |
+              - 
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: seeed_xiao_rp2040
+
+        include:
+          - code:
+              board:
+                vendor: rp2040
+                arch: rp2040
+            version: latest
+            index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          cli-version: latest
+          fqbn: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}:${{matrix.code.board.name}}
+          platforms: |
+            - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
+              version: ${{matrix.version}}
+              source-url: ${{matrix.index}}
+          libraries: |
+            ${{ env.UNIVERSAL_LIBRARIES }}
+            ${{ matrix.code.libraries }}
+          sketch-paths: |
+            ${{ matrix.code.sketch-paths }}
