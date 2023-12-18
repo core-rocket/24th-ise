@@ -129,14 +129,13 @@ jobs:
               vendor: rp2040
               arch: rp2040
               name: rpipico
+            index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
           - code:
               target: seeed_xiao_rp2040
             board:
               vendor: rp2040
               arch: rp2040
               name: seeed_xiao_rp2040
-          - board:
-              vendor: rp2040
             index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
     steps:
