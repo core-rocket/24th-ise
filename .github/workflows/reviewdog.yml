@@ -126,17 +126,15 @@ jobs:
         include:
           - code:
               - target: rpipico
-            board:
-              - vendor: rp2040
-                arch: rp2040
-                name: rpipico
+            vendor: rp2040
+            arch: rp2040
+            name: rpipico
             index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
           - code:
               - target: seeed_xiao_rp2040
-            board:
-              - vendor: rp2040
-                arch: rp2040
-                name: seeed_xiao_rp2040
+            vendor: rp2040
+            arch: rp2040
+            name: seeed_xiao_rp2040
             index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
     steps:
@@ -146,9 +144,9 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}:${{matrix.code.board.name}}
+          fqbn: ${{matrix.code.vendor}}:${{matrix.code.arch}}:${{matrix.code.name}}
           platforms: |
-            - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
+            - name: ${{matrix.code.vendor}}:${{matrix.code.arch}}
               source-url: ${{matrix.index}}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
