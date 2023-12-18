@@ -108,16 +108,32 @@ jobs:
 
       matrix:
         board:
-          - fqbn: arduino:avr:uno
-            main: true
-            valve: false
-          - fqbn: arduino:avr:nano
-            main: true
-            valve: false
-          - fqbn: adafruit:samd:arduino_zero_native
-            main: true
-            valve: false
+          - vendor: arduino
+            arch: samd
+            name: arduino_zero_native
+          - vendor: adafruit
+            arch: samd
+            name: adafruit_trinket_m0
+          - vendor: STMicroelectronics
+            arch: stm32
+            name: GenH5
+          - vendor: teensy
+            arch: avr
+            name: teensy41
 
+        include:
+          - index: https://downloads.arduino.cc/packages/package_index.json
+            board:
+              vendor: arduino
+          - index: https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+            board:
+              vendor: adafruit
+          - index: https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json
+            board:
+              vendor: STMicroelectronics
+          - index: https://www.pjrc.com/teensy/package_teensy_index.json
+            board:
+              vendor: teensy
           - board:
               main: true
             main-libraries: |
@@ -127,13 +143,17 @@ jobs:
               - Main
           - board:
               main: false
+            main-libraries: ""
             main-sketch-paths: ""
           - board:
               valve: true
+            valve-libraries: |
+              - name: Servo
             valve-sketch-paths: |
               - Valve
           - board:
               valve: false
+            valve-libraries: ""
             valve-sketch-paths: ""
 
     steps:
@@ -143,10 +163,10 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: ${{ matrix.board.fqbn }}
+          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
           platforms: |
-            - name: adafruit:samd
-            - source-path: "https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json"
+            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+              source-url: ${{matrix.index}}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
             ${{ matrix.main-libraries }}
