@@ -1,5 +1,5 @@
 // global data
-float data_bno_accel_x_mss = 0;
+flat data_bno_accel_x_mss = 0;
 float data_bno_accel_y_mss = 0;
 float data_bno_accel_z_mss = 0;
 float data_bme_pressure_hPa = 0;
