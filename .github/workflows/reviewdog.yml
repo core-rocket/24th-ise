@@ -98,7 +98,7 @@ jobs:
 
     env:
       UNIVERSAL_LIBRARIES: |
-        - name: Servo
+        - ""
 
       UNIVERSAL_SKETCH_PATHS: |
         - ""
