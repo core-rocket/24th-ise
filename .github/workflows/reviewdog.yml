@@ -121,14 +121,14 @@ jobs:
               - name: Keyboard
               - name: Mouse
             main-sketch-paths: |
-              - main/main
+              - main
           - board:
               main: false
             main-sketch-paths: ""
           - board:
               valve: true
-            serial1-sketch-paths: |
-              - valve/valve
+            valve-sketch-paths: |
+              - "" 
           - board:
               valve: false
             valve-sketch-paths: ""
