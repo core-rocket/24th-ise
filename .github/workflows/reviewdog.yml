@@ -93,7 +93,7 @@ jobs:
           " # Optional
 
   build:
-    name: ${{ matrix.code.name }}
+    name: ${{ matrix.code.source }}
     runs-on: ubuntu-latest
 
     env:
@@ -108,14 +108,15 @@ jobs:
 
       matrix:
         code:
-          - name: main
+          - source: main
             libraries: |
-              - name: Keyboard
-              - name: Mouse
+              - name: Adafruit BusIO
+              - name: Adafruit Unified Sensor
+              - name: Adafruit BME280 Library
             sketch-paths: |
               - Main
             target: rpipico
-          - name: valve
+          - source: valve
             libraries: |
               - name: Servo
             sketch-paths: |
@@ -124,15 +125,17 @@ jobs:
         include:
           - code:
               target: rpipico
-            vendor: rp2040
-            arch: rp2040
-            name: rpipico
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: rpipico
           - code:
               target: seeed_xiao_rp2040
-            vendor: rp2040
-            arch: rp2040
-            name: seeed_xiao_rp2040
-          - code:
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: seeed_xiao_rp2040
+          - board:
               vendor: rp2040
             index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
@@ -143,9 +146,9 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: ${{matrix.code.vendor}}:${{matrix.code.arch}}:${{matrix.code.name}}
+          fqbn: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}:${{matrix.code.board.name}}
           platforms: |
-            - name: ${{matrix.code.vendor}}:${{matrix.code.arch}}
+            - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
               source-url: ${{matrix.index}}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
