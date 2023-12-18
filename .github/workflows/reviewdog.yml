@@ -99,10 +99,15 @@ jobs:
     env:
       UNIVERSAL_LIBRARIES: |
         - name: Servo
+          version: latest
         - name: Adafruit BusIO
+          version: latest
         - name: Adafruit Unified Sensor
+          version: latest
         - name: Adafruit BME280 Library
+          version: latest
         - name: Adafruit BNO055
+          version: latest
 
     strategy:
       fail-fast: false
@@ -111,7 +116,7 @@ jobs:
         code:
           - sketch-paths: Main
             libraries: |
-              - name: Servo
+              - 
             board:
               vendor: rp2040
               arch: rp2040
@@ -139,6 +144,7 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
+          cli-version: latest
           fqbn: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}:${{matrix.code.board.name}}
           platforms: |
             - name: ${{matrix.code.board.vendor}}:${{matrix.code.board.arch}}
