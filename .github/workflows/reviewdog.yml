@@ -144,13 +144,10 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: rp2040:rp2040:rpipico
-          # ${{matrix.code.vendor}}:${{matrix.code.arch}}:${{matrix.code.name}}
+          fqbn: "rp2040:rp2040:rpipico"
           platforms: |
             - name: rp2040:rp2040
-          # ${{matrix.code.vendor}}:${{matrix.code.arch}}
-              source-url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json 
-          # ${{matrix.index}}
+              source-url: "https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json"
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
