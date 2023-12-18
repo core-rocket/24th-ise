@@ -93,7 +93,7 @@ jobs:
           " # Optional
 
   build:
-    name: ${{ matrix.board.name }}
+    name: ${{ matrix.code.name }}
     runs-on: ubuntu-latest
 
     env:
@@ -107,49 +107,34 @@ jobs:
       fail-fast: false
 
       matrix:
-        board:
-          - vendor: rp2040
-            arch: rp2040
-            name: rpipico
-            main: true
-            valve: false
-          - vendor: rp2040
-            arch: rp2040
-            name: rpipicow
-            main: true
-            valve: false
-          - vendor: rp2040
-            arch: rp2040
-            name: seeed_xiao_rp2040
-            main: false
-            valve: true
-
-        include:
-          - board:
-              vendor: rp2040
-            index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
-
-          - board:
-              main: true
-            main-libraries: |
+        code:
+          - name: main
+            libraries: |
               - name: Keyboard
               - name: Mouse
-            main-sketch-paths: |
+            sketch-paths: |
               - Main
-          - board:
-              main: false
-            main-libraries: ""
-            main-sketch-paths: ""
-          - board:
-              valve: true
-            valve-libraries: |
+            target: rpipico
+          - name: valve
+            libraries: |
               - name: Servo
-            valve-sketch-paths: |
+            sketch-paths: |
               - Valve
-          - board:
-              valve: false
-            valve-libraries: ""
-            valve-sketch-paths: ""
+
+        include:
+          - code:
+              target: rpipico
+              vendor: rp2040
+              arch: rp2040
+              name: rpipico
+          - code:
+              target: seeed_xiao_rp2040
+              vendor: rp2040
+              arch: rp2040
+              name: seeed_xiao_rp2040
+          - code:
+              vendor: rp2040
+            index: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
     steps:
       - name: Checkout
@@ -158,15 +143,12 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: ${{matrix.board.vendor}}:${{matrix.board.arch}}:${{matrix.board.name}}
+          fqbn: ${{matrix.code.vendor}}:${{matrix.code.arch}}:${{matrix.code.name}}
           platforms: |
-            - name: ${{matrix.board.vendor}}:${{matrix.board.arch}}
+            - name: ${{matrix.code.vendor}}:${{matrix.code.arch}}
               source-url: ${{matrix.index}}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
-            ${{ matrix.main-libraries }}
-            ${{ matrix.valve-libraries }}
-          sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
-            ${{ matrix.main-sketch-paths }}
-            ${{ matrix.valve-sketch-paths }}
+            ${{ matrix.code.libraries }}
+            ${{ matrix.code.sketch-paths }}
