@@ -103,7 +103,7 @@ jobs:
         code:
           - source: main
             libraries: |
-              - ""
+              - name: Servo
             sketch-paths: |
               - Main
             board:
@@ -113,7 +113,7 @@ jobs:
             
           - source: valve
             libraries: |
-              - ""
+              - name: Servo
             sketch-paths: |
               - Valve
             board:
