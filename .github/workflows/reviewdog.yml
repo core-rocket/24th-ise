@@ -117,10 +117,7 @@ jobs:
           - fqbn: adafruit:samd:arduino_zero_native
             main: true
             valve: false
-        include:
-          - board:
-              index: "https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json"
-                vendor: adafruit
+
           - board:
               main: true
             main-libraries: |
@@ -147,6 +144,9 @@ jobs:
         uses: arduino/compile-sketches@v1
         with:
           fqbn: ${{ matrix.board.fqbn }}
+          platforms: |
+            - name: adafruit:samd
+            - source-path: "https://github.com/stm32duino/BoardManagerFiles/raw/main/package_stmicroelectronics_index.json"
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
             ${{ matrix.main-libraries }}
