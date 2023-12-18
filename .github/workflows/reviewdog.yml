@@ -93,7 +93,7 @@ jobs:
           " # Optional
 
   build:
-    name: ${{ matrix.board.fqbn }}
+    name: ${{ matrix.board.name }}
     runs-on: ubuntu-latest
 
     env:
