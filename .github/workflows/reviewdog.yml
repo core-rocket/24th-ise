@@ -103,7 +103,7 @@ jobs:
         code:
           - source: main
             libraries: |
-              - name: Servo
+              - ""
             sketch-paths: |
               - Main
             board:
@@ -113,13 +113,13 @@ jobs:
             
           - source: valve
             libraries: |
-              - name: Servo
+              - ""
             sketch-paths: |
               - Valve
             board:
               vendor: rp2040
               arch: rp2040
-              name: rpipico
+              name: seeed_xiao_rp2040
 
         include:
           - code:
