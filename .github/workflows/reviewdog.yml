@@ -93,7 +93,7 @@ jobs:
           " # Optional
 
   build:
-    name: ${{ matrix.code.source }}
+    name: ${{ matrix.code.sketch-paths }}
     runs-on: ubuntu-latest
 
     env:
@@ -105,21 +105,17 @@ jobs:
 
       matrix:
         code:
-          - source: main
+          - sketch-paths: Main
             libraries: |
               - name: Servo
-            sketch-paths: |
-              - Main
             board:
               vendor: rp2040
               arch: rp2040
               name: rpipico
             
-          - source: valve
+          - sketch-paths: Valve
             libraries: |
               - name: Servo
-            sketch-paths: |
-              - Valve
             board:
               vendor: rp2040
               arch: rp2040
