@@ -99,6 +99,10 @@ jobs:
     env:
       UNIVERSAL_LIBRARIES: |
         - name: Servo
+        - name: Adafruit Adafruit BusIO
+        - name: Adafruit Unified Sensor
+        - name: Adafruit BME280 Library
+        - name: Adafruit BNO055
 
     strategy:
       fail-fast: false
@@ -115,7 +119,7 @@ jobs:
             
           - sketch-paths: Valve
             libraries: |
-              - name: Servo
+              - 
             board:
               vendor: rp2040
               arch: rp2040
