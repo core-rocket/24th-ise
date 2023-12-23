@@ -1,15 +1,12 @@
 #include <SPI.h>
 #include <string.h>
-#include <Servo.h>
 
 #define TWE_Valve D2
 #define TWE_Drain D3
 #define TWE_CHECK D4
-#define Drain D0
-#define Valve D1
+#define PIN_Drain D0
+#define PIN_Valve 27
 #define NC D7
-
-
 
 typedef enum {
   STANDBY,
@@ -20,9 +17,22 @@ typedef enum {
 } MODE;
 MODE mode = STANDBY;
 
-Servo Valve_Servo;
-const int open_pwm = 168;
-const int close_pwm = 50;
+
+#include "pico/stdlib.h"
+#include "hardware/pwm.h"
+#define DF_MOT_PERIOD_CYCLE 25000  //value of period cycles
+#define DF_MOT_CYCLE_TIME 20.00F   //time of one cycle[ms]
+#define DF_MOT_DUTY_N90_DEG 0.50F  //-90deg time of high level[ms]
+#define DF_MOT_DUTY_N70_DEG 0.71F  //-70deg time of high level[ms]
+#define DF_MOT_DUTY_N65_DEG 0.76F  //-65deg time of high level[ms]
+#define DF_MOT_DUTY_N60_DEG 0.82F  //-60deg time of high level[ms]
+#define DF_MOT_DUTY_N30_DEG 1.13F  //-30deg time of high level[ms]
+#define DF_MOT_DUTY_0_DEG 1.45F    //  0deg time of high level[ms]
+#define DF_MOT_DUTY_P30_DEG 1.80F  //+30deg time of high level[ms]
+#define DF_MOT_DUTY_P60_DEG 2.10F  //+60deg time of high level[ms]
+#define DF_MOT_DUTY_P90_DEG 2.40F  //+90deg time of high level[ms]
+const float open_pwm = 1.90F;
+const float close_pwm = 1.00F;
 
 bool need_over_close = true;
 
@@ -40,16 +50,36 @@ unsigned long int checkmode_enter_time = 0;
 bool timer_10Hz = false;
 
 void setup() {
-  pinMode(Drain, OUTPUT);
-  digitalWrite(Drain, HIGH);
+  pinMode(PIN_Drain, OUTPUT);
+  digitalWrite(PIN_Drain, HIGH);
 
   pinMode(TWE_CHECK, INPUT);
   pinMode(TWE_Valve, INPUT);
   pinMode(TWE_Drain, INPUT);
 
+  gpio_set_function(PIN_Valve, GPIO_FUNC_PWM);
 
-  Valve_Servo.attach(Valve);
-  Valve_Servo.write(close_pwm);
+  // Find out which PWM slice is connected to GPIO port number (it's slice 0)
+  uint slice_num = pwm_gpio_to_slice_num(PIN_Valve);
+  uint16_t count;
+
+  // get default pwm confg
+  pwm_config cfg = pwm_get_default_config();
+
+  // set pwm config modified div mode and div int value
+  pwm_config_set_clkdiv_mode(&cfg, PWM_DIV_FREE_RUNNING);
+  pwm_config_set_clkdiv_int(&cfg, 100);
+  pwm_init(slice_num, &cfg, false);
+
+  // Set period of DF_MOT_PERIOD_CYCLE (0 to DF_MOT_PERIOD_CYCLE-1 inclusive)
+  pwm_set_wrap(slice_num, (DF_MOT_PERIOD_CYCLE - 1));
+  // Set channel A or B output high for one cycle before dropping
+  if (PIN_Valve % 2) {  //odd number
+    pwm_set_chan_level(slice_num, PWM_CHAN_B, 0);
+  } else {  //even numberf
+    pwm_set_chan_level(slice_num, PWM_CHAN_A, 0);
+  }
+  Valve_Servo(close_pwm);
 
   Serial.begin(115200);
   delay(500);
@@ -89,7 +119,7 @@ void loop() {
   switch (mode) {
     case STANDBY:
       if (twe_valve || es_valve) {
-        int now_pwm = close_pwm;
+        float now_pwm = close_pwm;
 
         /*
         now_pwm += 50;
@@ -107,19 +137,20 @@ void loop() {
         }*/
 
         now_pwm = open_pwm;
-        Valve_Servo.write(now_pwm);
+        //Valve_Servo.write(now_pwm);
+        Valve_Servo(now_pwm);
 
         Servo_Valve_open_time = millis();
         mode = VALVE;
         need_over_close = true;
       }
       if (twe_drain) {
-        digitalWrite(Drain, LOW);
+        digitalWrite(PIN_Drain, LOW);
         Drain_open_time = millis();
         mode = TWE_DRAIN;
       }
       if (es_drain_start) {
-        digitalWrite(Drain, LOW);
+        digitalWrite(PIN_Drain, LOW);
         Drain_open_time = millis();
         mode = ES_DRAIN;
       }
@@ -134,16 +165,18 @@ void loop() {
     case VALVE:
       if (millis() - Servo_Valve_open_time >= Servo_open_period) {
         if (need_over_close) {
-          Valve_Servo.write(close_pwm - 10);
+          //Valve_Servo.write(close_pwm - 10);
+          Valve_Servo(close_pwm - 0.1);
           delay(1000);
           need_over_close = false;
         }
-        Valve_Servo.write(close_pwm);
+        //Valve_Servo.write(close_pwm);
+        Valve_Servo(close_pwm);
         if (!twe_valve) {
           toSTANDBY();
         }
         if (es_drain_start) {
-          digitalWrite(Drain, LOW);
+          digitalWrite(PIN_Drain, LOW);
           Drain_open_time = millis();
           mode = ES_DRAIN;
         }
@@ -155,8 +188,9 @@ void loop() {
         toSTANDBY();
       }
       if (millis() - Drain_open_time >= Drain_open_period) {
-        digitalWrite(Drain, HIGH);
-        Valve_Servo.write(close_pwm);
+        digitalWrite(PIN_Drain, HIGH);
+        //Valve_Servo.write(close_pwm);
+        Valve_Servo(close_pwm);
       }
       break;
 
@@ -176,6 +210,28 @@ void loop() {
 
 void toSTANDBY() {
   mode = STANDBY;
-  Valve_Servo.write(close_pwm);
-  digitalWrite(Drain, HIGH);
+  //Valve_Servo.write(close_pwm);
+  Valve_Servo(close_pwm);
+  digitalWrite(PIN_Drain, HIGH);
+}
+
+void Valve_Servo(float degree) {
+  uint16_t count = set_pwm_duty(DF_MOT_PERIOD_CYCLE, DF_MOT_CYCLE_TIME, degree);
+
+  // Find out which PWM slice is connected to GPIO port number (it's slice 0)
+  uint snum = pwm_gpio_to_slice_num(PIN_Valve);
+
+  // Set channel A output high for one cycle before dropping
+  if (PIN_Valve % 2) {  //odd number
+    pwm_set_chan_level(snum, PWM_CHAN_B, count);
+  } else {  //even number
+    pwm_set_chan_level(snum, PWM_CHAN_A, count);
+  }
+
+  // Set the PWM running
+  pwm_set_enabled(snum, true);
+}
+static uint16_t set_pwm_duty(uint16_t period_cycle, float cycletime, float hightime) {
+  float count_pms = (float)period_cycle / cycletime * hightime;
+  return ((uint16_t)count_pms);
 }
