@@ -89,7 +89,9 @@ jobs:
           ,-whitespace/newline\
           ,-whitespace/operators\
           ,-whitespace/parens\
-          ,-build/header_guard\          
+          ,-whitespace/tab\
+          ,-whitespace/line_length\
+          ,-build/header_guard\
           " # Optional
 
   build:
