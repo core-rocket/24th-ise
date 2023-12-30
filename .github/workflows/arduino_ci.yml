@@ -90,8 +90,8 @@ jobs:
           ,-whitespace/operators\
           ,-whitespace/parens\
           ,-whitespace/tab\
-          ,-build/header_guard\
           ,-whitespace/line_length\
+          ,-build/header_guard\
           " # Optional
 
   build:
