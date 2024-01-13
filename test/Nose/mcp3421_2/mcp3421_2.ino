@@ -24,19 +24,19 @@ void loop() {
 }
 void ConvertToVoltage(int32_t* _result, double* voltage) {
   byte bytes[4];
-  bytes[3] = (char)(*_result & 0xFF);
-  bytes[2] = (char)((*_result >> 8) & 0xFF);
-  bytes[1] = (char)((*_result >> 16) & 0xFF);
-  bytes[0] = (char)((*_result >> 24) & 0xFF);  //ライブラリの関数内で8bit右シフトしたときに発生したものなので無視
+  bytes[3] = static_cast<char>(*_result & 0xFF);
+  bytes[2] = static_cast<char>((*_result >> 8) & 0xFF);
+  bytes[1] = static_cast<char>((*_result >> 16) & 0xFF);
+  bytes[0] = static_cast<char>((*_result >> 24) & 0xFF);  //ライブラリの関数内で8bit右シフトしたときに発生したものなので無視
   double pga = 1;
   double lsb = 2 * 2.048 / pow(2, 18);
 
   byte msb = (bytes[1] >> 6) & 0x01;
   uint32_t outputcode = bytes[3] | (bytes[2] << 8) | ((bytes[1] * 0x01) << 16);
   if (msb == 0x00) {  //正の値
-    *voltage = (double)(outputcode)*lsb / pga;
+    *voltage = static_cast<double>(outputcode)*lsb / pga;
   } else {                                        //負の値
     outputcode = ((~outputcode) & 0x01FFFF) + 1;  //2の補数
-    *voltage = -(double)(outputcode)*lsb / pga;
+    *voltage = -static_cast<double>(outputcode)*lsb / pga;
   }
 }

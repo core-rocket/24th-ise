@@ -97,9 +97,9 @@ void GetBME280Data(float* temperature, float* barometic_pressure) {
 }
 
 void DevideBytes(int32_t* _result, char* bytes) {
-  bytes[2] = (char)(*_result & 0xFF);
-  bytes[1] = (char)((*_result >> 8) & 0xFF);
-  bytes[0] = (char)((*_result >> 16) & 0xFF);
+  bytes[2] = static_cast<char>(*_result & 0xFF);
+  bytes[1] = static_cast<char>((*_result >> 8) & 0xFF);
+  bytes[0] = static_cast<char>((*_result >> 16) & 0xFF);
 }
 
 void ConvertToVoltage(char* bytes, double* voltage) {
@@ -109,10 +109,10 @@ void ConvertToVoltage(char* bytes, double* voltage) {
   byte msb = (bytes[0] >> 6) & 0x01;
   uint32_t outputcode = bytes[2] | (bytes[1] << 8) | ((bytes[0] * 0x01) << 16);
   if (msb == 0x00) {  //正の値
-    *voltage = (double)(outputcode)*lsb / pga;
+    *voltage = static_cast<double>(outputcode)*lsb / pga;
   } else {                                        //負の値
     outputcode = ((~outputcode) & 0x01FFFF) + 1;  //2の補数
-    *voltage = -(double)(outputcode)*lsb / pga;
+    *voltage = -static_cast<double>(outputcode)*lsb / pga;
   }
 }
 
