@@ -8,6 +8,7 @@ byte rx_payload[199]={0};
 E220 e220(0xFF,0xFF,0x00);//TARGETADRESS=0xFFFF,CHANNEL=0x00
 
 void setup(){
+    Serial1.setFIFOSize(512);//rp2040のとき必要
     Serial.begin(9600);
     Serial1.begin(9600);
 }
