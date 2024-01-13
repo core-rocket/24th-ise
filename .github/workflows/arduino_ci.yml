@@ -113,9 +113,9 @@ jobs:
           version: latest
         - source-url: https://github.com/uChip/MCP342X.git
         - source-url: https://github.com/core-rocket/CCP.git
-        - source-url: https://github.com/coryjfowler/MCP_CAN_lib
-        - source-url: https://github.com/771-8bit/W25Q512
-        - source-url: https://github.com/sdesalas/Arduino-Queue.h
+        - source-url: https://github.com/coryjfowler/MCP_CAN_lib.git
+        - source-url: https://github.com/771-8bit/W25Q512.git
+        - source-url: https://github.com/sdesalas/Arduino-Queue.h.git
 
     strategy:
       fail-fast: false
