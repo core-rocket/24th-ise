@@ -111,6 +111,9 @@ jobs:
           version: latest
         - name: Adafruit BNO055
           version: latest
+        - name: MCP342x
+          version: latest
+        - source-url: https://github.com/core-rocket/CCP.git
 
     strategy:
       fail-fast: false
