@@ -16,7 +16,6 @@ Adafruit_BME280 bme;
 MCP342X myADC;
 CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 
-unsigned long delayTime;
 const int clockFrequency = 400000;  //I2C bus speed
 bool timer100Hz = false;
 bool sleep_sensors = false;

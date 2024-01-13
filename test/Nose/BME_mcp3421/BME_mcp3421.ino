@@ -7,7 +7,6 @@
 Adafruit_BME280 bme;
 MCP342X myADC;
 
-unsigned long delayTime;
 const int clockFrequency = 400000;  //I2C bus speed
 
 double voltage;

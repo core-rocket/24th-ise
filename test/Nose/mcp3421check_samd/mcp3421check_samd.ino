@@ -19,15 +19,11 @@ void setup() {
   myADC.configure(MCP342X_MODE_CONTINUOUS | MCP342X_CHANNEL_1 | MCP342X_SIZE_16BIT | MCP342X_GAIN_1X);
 
   Serial.println(myADC.getConfigRegShdw(), HEX);
-
 }  // End of setup()
 
 void loop() {
   static int16_t result;
-
   myADC.startConversion();
   myADC.getResult(&result);
-
   Serial.println(result, HEX);
-
 }  // End of loop()

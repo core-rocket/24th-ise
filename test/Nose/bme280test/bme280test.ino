@@ -6,8 +6,6 @@
 
 Adafruit_BME280 bme;
 
-unsigned long delayTime;
-
 void setup() {
   Serial.begin(9600);
   unsigned status;
@@ -17,12 +15,10 @@ void setup() {
   status = bme.begin(0x76);
 }
 
-
 void loop() {
   printValues();
   delay(1000);
 }
-
 
 void printValues() {
   Serial.print("Temperature = ");
