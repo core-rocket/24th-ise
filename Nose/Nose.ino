@@ -97,7 +97,7 @@ void GetBME280Data(float* temperature, float* barometic_pressure) {
 }
 
 void DevideBytes(int32_t* _result, char* bytes) {
-  bytes[2] = static_cast<char>(*_result & 0xFF);
+  bytes[2] = static_cast<char>(*_result & 0xFF);//(char)から変更．C-style castを使うとunsafeなコードになるので
   bytes[1] = static_cast<char>((*_result >> 8) & 0xFF);
   bytes[0] = static_cast<char>((*_result >> 16) & 0xFF);
 }
