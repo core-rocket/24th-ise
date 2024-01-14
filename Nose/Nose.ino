@@ -3,7 +3,7 @@
 #include <MCP342X.h>
 #include <CCP_MCP2515.h>
 
-#define CAN_AVAIRABLE
+bool can_avairable = true;
 
 #define CAN0_CS 0
 #define CAN0_INT 1
@@ -31,17 +31,17 @@ void setup() {
   bme.begin(0x76);
   myADC.configure(MCP342X_MODE_CONTINUOUS | MCP342X_CHANNEL_1 | MCP342X_SIZE_18BIT | MCP342X_GAIN_1X);
   add_repeating_timer_us(10000, TimerIsr, NULL, &st_timer);  //100Hz
-#ifdef CAN_AVAIRABLE
-  CCP.begin();
-#endif
+  if (can_avairable) {
+    CCP.begin();
+  }
 }
 
 void loop() {
-  static int32_t result;
-  static float temperature;
-  static float barometic_pressure;
-  static char adc_bytes[3];
-  static double voltage;
+  static int32_t result = 0x00;
+  static float temperature = 0.0;
+  static float barometic_pressure = 0.0;
+  static char adc_bytes[3] = { 0x00, 0x00, 0x00 };
+  static double voltage = 0.0;
   if (timer100Hz) {
     timer100Hz = false;
     if (!sleep_sensors) {
@@ -52,43 +52,45 @@ void loop() {
       ConvertToVoltage(adc_bytes, &voltage);  //3つのバイトを電圧に変換
       //BME280関連
       GetBME280Data(&temperature, &barometic_pressure);
-//CAN送信
-#ifdef CAN_AVAIRABLE
-      CCP.uint32_to_device(CCP_nose_adc, voltage);
-      CCP.float_to_device(CCP_nose_temperature, temperature);
-      CCP.float_to_device(CCP_nose_barometic_pressure, barometic_pressure);
-      if (can_checkerflag) {
-        CCP.string_to_device(CCP_nose_status, "OK");
-        can_checkerflag = false;
+      //CAN送信
+      if (can_avairable) {
+        CCP.uint32_to_device(CCP_nose_adc, voltage);
+        CCP.float_to_device(CCP_nose_temperature, temperature);
+        CCP.float_to_device(CCP_nose_barometic_pressure, barometic_pressure);
+        if (can_checkerflag) {
+          CCP.string_to_device(CCP_nose_status, "OK");
+          can_checkerflag = false;
+        }
       }
-#endif
-
       //シリアル出力
       SerialPrintSensors(adc_bytes, temperature, barometic_pressure, voltage);
     }
   }
-#ifdef CAN_AVAIRABLE
-  CCP.read_device();
-  switch (CCP.id) {
-    case CCP_EMST_mesure:
-      if (CCP.str_match("STOP", 4)) {
-        sleep_sensors = true;
-      } else if (CCP.str_match("CLEAR", 5)) {
-        sleep_sensors = false;
-      }
-      break;
-    case CCP_nose_adc:
-      if (CCP.str_match("CHECK", 5)) {
-        can_checkerflag = true;
-      }
-      if (CCP.str_match("KILL", 4)) {
-        sleep_sensors = true;
-      }
-      break;
-    default:
-      break;
+  if (can_avairable) {
+    CCP.read_device();
+    switch (CCP.id) {
+      case CCP_EMST_mesure:
+        if (CCP.str_match("STOP", 4)) {
+          sleep_sensors = true;
+        } else if (CCP.str_match("CLEAR", 5)) {
+          sleep_sensors = false;
+        }
+        break;
+      case CCP_nose_adc:
+        if (CCP.str_match("CHECK", 5)) {
+          can_checkerflag = true;
+        }
+        if (CCP.str_match("KILL", 4)) {
+          sleep_sensors = true;
+        }
+        if (CCP.str_match("CLEAR", 5)) {
+          sleep_sensors = false;
+        }
+        break;
+      default:
+        break;
+    }
   }
-#endif
 }
 
 void GetBME280Data(float* temperature, float* barometic_pressure) {
@@ -97,7 +99,7 @@ void GetBME280Data(float* temperature, float* barometic_pressure) {
 }
 
 void DevideBytes(int32_t* _result, char* bytes) {
-  bytes[2] = static_cast<char>(*_result & 0xFF);//(char)から変更．C-style castを使うとunsafeなコードになるので
+  bytes[2] = static_cast<char>(*_result & 0xFF);  //(char)から変更．C-style castを使うとunsafeなコードになるので
   bytes[1] = static_cast<char>((*_result >> 8) & 0xFF);
   bytes[0] = static_cast<char>((*_result >> 16) & 0xFF);
 }
@@ -109,10 +111,10 @@ void ConvertToVoltage(char* bytes, double* voltage) {
   byte msb = (bytes[0] >> 6) & 0x01;
   uint32_t outputcode = bytes[2] | (bytes[1] << 8) | ((bytes[0] * 0x01) << 16);
   if (msb == 0x00) {  //正の値
-    *voltage = static_cast<double>(outputcode)*lsb / pga;
+    *voltage = static_cast<double>(outputcode) * lsb / pga;
   } else {                                        //負の値
     outputcode = ((~outputcode) & 0x01FFFF) + 1;  //2の補数
-    *voltage = -static_cast<double>(outputcode)*lsb / pga;
+    *voltage = -static_cast<double>(outputcode) * lsb / pga;
   }
 }
 
