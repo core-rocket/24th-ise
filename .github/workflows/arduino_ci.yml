@@ -137,6 +137,14 @@ jobs:
               vendor: rp2040
               arch: rp2040
               name: seeed_xiao_rp2040
+            
+          - sketch-paths: Nose
+            libraries: |
+              - 
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: seeed_xiao_rp2040
 
         include:
           - code:
