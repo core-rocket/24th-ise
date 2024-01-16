@@ -31,7 +31,7 @@
 <img src="images/circuit.png" width="100%">
 
 ### PCB
-<img src="images/PCB1.png" width="300"><img src="images/PCB2.png" width="400">
+<img src="images/PCB1_ver2.png" width="300"><img src="images/PCB2.png" width="400">
 ## ソフトウェア
 ### 依存関係
 - Wire.h
