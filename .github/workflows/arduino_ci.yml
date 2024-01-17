@@ -110,7 +110,7 @@ jobs:
         - name: Adafruit BME280 Library
           version: latest
         - name: Adafruit BNO055
-          version: latest          
+          version: latest
         - name: MedianFilterLib
           version: latest
 
