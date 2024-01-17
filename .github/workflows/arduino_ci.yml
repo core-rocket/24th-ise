@@ -111,6 +111,8 @@ jobs:
           version: latest
         - name: Adafruit BNO055
           version: latest
+        - name: MedianFilterLib
+          version: latest
         - source-url: https://github.com/uChip/MCP342X.git
         - source-url: https://github.com/core-rocket/CCP.git
         - source-url: https://github.com/coryjfowler/MCP_CAN_lib.git
