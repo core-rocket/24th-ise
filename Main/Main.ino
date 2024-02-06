@@ -7,6 +7,8 @@ float data_bme_temperature_degC = 0;
 float data_bme_altitude_m = 0;
 uint32_t data_gnss_latitude_udeg = 0;
 uint32_t data_gnss_longitude_udeg = 0;
+float data_bat_v = 0;
+float data_ext_v = 0;
 
 // pinout
 const uint8_t BNO_SDA = 4;
@@ -61,6 +63,8 @@ SerialPIO Serial_GNSS(GNSS_TX, GNSS_RX, 512);
 
 // setup()ではdelay()使用可
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   // デバッグ出力
   Serial.begin(115200);
 
@@ -88,6 +92,8 @@ void setup() {
     Adafruit_BME280::STANDBY_MS_0_5
   );
 
+  analogReadResolution(12);
+
   Serial_ES920.setTX(ES920_TX);
   Serial_ES920.setRX(ES920_RX);
   Serial_ES920.setFIFOSize(64);
@@ -108,6 +114,9 @@ void loop() {
       count_10Hz = 0;
 
       // 10Hzで実行する処理
+
+      data_bat_v = analogRead(BAT_V) * 3.3 * 11 / (1 << 12);
+      data_ext_v = analogRead(EXT_V) * 3.3 * 11 / (1 << 12);
 
       // デバッグ出力
       Serial.print("BNO055, ");
@@ -130,6 +139,12 @@ void loop() {
       Serial.print(data_gnss_latitude_udeg);
       Serial.print(", ");
       Serial.print(data_gnss_latitude_udeg);
+      Serial.print(", ");
+
+      Serial.print("voltage, ");
+      Serial.print(data_bat_v);
+      Serial.print(", ");
+      Serial.print(data_ext_v);
       Serial.print(", ");
       Serial.print("\n");
     }
