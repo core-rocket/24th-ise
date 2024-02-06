@@ -8,6 +8,24 @@ float data_bme_altitude_m = 0;
 uint32_t data_gnss_latitude_udeg = 0;
 uint32_t data_gnss_longitude_udeg = 0;
 
+// pinout
+const uint8_t BNO_SDA = 4;
+const uint8_t BNO_SCL = 5;
+const uint8_t VALVE_TX = 6;
+const uint8_t VALVE_RX = 7;
+const uint8_t ES920_TX = 8;
+const uint8_t ES920_RX = 9;
+const uint8_t BME_SDA = 10;
+const uint8_t BME_SCL = 11;
+const uint8_t E220_TX = 12;
+const uint8_t E220_RX = 13;
+const uint8_t GNSS_TX = 14;
+const uint8_t GNSS_RX = 15;
+const uint8_t KEY_SW = 20;
+const uint8_t SERVO = 21;
+const uint8_t EXT_V = 26;
+const uint8_t BAT_V = 27;
+
 // Servo
 
 
@@ -29,9 +47,7 @@ const float SEALEVELPRESSURE_HPA = 1013.25;
 
 // SAM-M8Q
 
-
 // ES920LR
-
 
 // W25Q128
 
@@ -42,14 +58,16 @@ void setup() {
   // デバッグ出力
   Serial.begin(115200);
 
+  Wire.setSDA(BNO_SDA);
+  Wire.setSCL(BNO_SCL);
   while (!bno.begin())
   {
     Serial.print("BNO055 ERR");
     delay(100);
   }
   
-  Wire1.setSDA(10);
-  Wire1.setSCL(11);
+  Wire1.setSDA(BME_SDA);
+  Wire1.setSCL(BME_SCL);
   while (!bme.begin(0x76, &Wire1))
   {
     Serial.print("BME280 ERR");
