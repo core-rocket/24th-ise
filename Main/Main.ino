@@ -15,7 +15,12 @@ uint32_t data_gnss_longitude_udeg = 0;
 
 
 // BNO055
-
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
+sensors_event_t  accelerometerData;
 
 // BME280
 
@@ -34,6 +39,12 @@ uint32_t data_gnss_longitude_udeg = 0;
 void setup() {
   // デバッグ出力
   Serial.begin(115200);
+
+  while (!bno.begin())
+  {
+    Serial.print("BNO055 ERR");
+    delay(100);
+  }
 }
 
 // loop()と，ここから呼び出される関数ではdelay()使用禁止
@@ -71,16 +82,17 @@ void loop() {
       Serial.print(", ");
       Serial.print(data_gnss_latitude_udeg);
       Serial.print(", ");
+      Serial.print("\n");
     }
 
     // 100Hzで実行する処理
 
 
     // BNO055から100Hzで測定
-    // ～測定処理～
-    // data_bno_accel_x_mss = ~;
-    // data_bno_accel_y_mss = ~;
-    // data_bno_accel_z_mss = ~;
+    bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    data_bno_accel_x_mss = accelerometerData.acceleration.x;
+    data_bno_accel_y_mss = accelerometerData.acceleration.y;
+    data_bno_accel_z_mss = accelerometerData.acceleration.z;
 
 
     // BME280から100Hzで測定
