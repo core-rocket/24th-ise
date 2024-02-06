@@ -49,9 +49,11 @@ const float SEALEVELPRESSURE_HPA = 1013.25;
 #include <TinyGPS++.h>
 TinyGPSPlus gps;
 SerialPIO Serial_GNSS(GNSS_TX, GNSS_RX, 512);
+// https://arduino-pico.readthedocs.io/en/latest/piouart.html
 
 // ES920LR
-#define Serial_ES920 Serial1
+#define Serial_ES920 Serial2
+// https://moyoi-memo.hatenablog.com/entry/2022/02/15/112100
 
 // W25Q128
 
