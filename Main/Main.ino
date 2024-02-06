@@ -46,8 +46,10 @@ Adafruit_BME280 bme;
 const float SEALEVELPRESSURE_HPA = 1013.25;
 
 // SAM-M8Q
+SerialPIO Serial_GNSS(GNSS_TX, GNSS_RX, 512);
 
 // ES920LR
+#define Serial_ES920 Serial1
 
 // W25Q128
 
@@ -82,6 +84,12 @@ void setup() {
     Adafruit_BME280::STANDBY_MS_0_5
   );
 
+  Serial_ES920.setTX(ES920_TX);
+  Serial_ES920.setRX(ES920_RX);
+  Serial_ES920.setFIFOSize(64);
+  Serial_ES920.begin(115200);
+
+  Serial_GNSS.begin(115200);
 }
 
 // loop()と，ここから呼び出される関数ではdelay()使用禁止
