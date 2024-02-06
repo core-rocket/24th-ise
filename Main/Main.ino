@@ -93,6 +93,7 @@ void setup() {
   );
 
   analogReadResolution(12);
+  pinMode(KEY_SW, INPUT);
 
   Serial_ES920.setTX(ES920_TX);
   Serial_ES920.setRX(ES920_RX);
@@ -114,7 +115,8 @@ void loop() {
       count_10Hz = 0;
 
       // 10Hzで実行する処理
-
+      // フライト = 回路としてOPEN = LOW
+      bool key_sw_active = (digitalRead(KEY_SW)==LOW);
       data_bat_v = analogRead(BAT_V) * 3.3 * 11 / (1 << 12);
       data_ext_v = analogRead(EXT_V) * 3.3 * 11 / (1 << 12);
 
