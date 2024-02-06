@@ -46,6 +46,8 @@ Adafruit_BME280 bme;
 const float SEALEVELPRESSURE_HPA = 1013.25;
 
 // SAM-M8Q
+#include <TinyGPS++.h>
+TinyGPSPlus gps;
 SerialPIO Serial_GNSS(GNSS_TX, GNSS_RX, 512);
 
 // ES920LR
@@ -89,7 +91,7 @@ void setup() {
   Serial_ES920.setFIFOSize(64);
   Serial_ES920.begin(115200);
 
-  Serial_GNSS.begin(115200);
+  Serial_GNSS.begin(9600);
 }
 
 // loop()と，ここから呼び出される関数ではdelay()使用禁止
@@ -148,7 +150,11 @@ void loop() {
   // 常に実行する処理
 
   // SAM-M8QのUARTを常に読み出し
-  // ～測定処理～
-  // data_gnss_latitude_udeg = ~;
-  // data_gnss_longitude_udeg = ~;
+  while (Serial_GNSS.available()) {
+    gps.encode(Serial_GNSS.read());
+    if (gps.location.isUpdated()) {
+      data_gnss_latitude_udeg = gps.location.lat() * 1000000;
+      data_gnss_longitude_udeg = gps.location.lng() * 1000000;
+    }
+  }
 }
