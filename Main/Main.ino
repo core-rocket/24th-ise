@@ -23,7 +23,9 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
 sensors_event_t  accelerometerData;
 
 // BME280
-
+#include <Adafruit_BME280.h>
+Adafruit_BME280 bme;
+const float SEALEVELPRESSURE_HPA = 1013.25;
 
 // SAM-M8Q
 
@@ -45,6 +47,23 @@ void setup() {
     Serial.print("BNO055 ERR");
     delay(100);
   }
+  
+  Wire1.setSDA(10);
+  Wire1.setSCL(11);
+  while (!bme.begin(0x76, &Wire1))
+  {
+    Serial.print("BME280 ERR");
+    delay(100);
+  }
+  bme.setSampling(
+    Adafruit_BME280::MODE_NORMAL,
+    Adafruit_BME280::SAMPLING_X1,
+    Adafruit_BME280::SAMPLING_X2,
+    Adafruit_BME280::SAMPLING_NONE,
+    Adafruit_BME280::FILTER_X16,
+    Adafruit_BME280::STANDBY_MS_0_5
+  );
+
 }
 
 // loop()と，ここから呼び出される関数ではdelay()使用禁止
@@ -69,7 +88,7 @@ void loop() {
       Serial.print(data_bno_accel_z_mss);
       Serial.print(", ");
 
-      Serial.print("BNO055, ");
+      Serial.print("BME280, ");
       Serial.print(data_bme_pressure_hPa);
       Serial.print(", ");
       Serial.print(data_bme_temperature_degC);
@@ -94,12 +113,10 @@ void loop() {
     data_bno_accel_y_mss = accelerometerData.acceleration.y;
     data_bno_accel_z_mss = accelerometerData.acceleration.z;
 
-
     // BME280から100Hzで測定
-    // ～測定処理～
-    // data_bme_pressure_hPa = ~;
-    // data_bme_temperature_degC = ~;
-    // data_bme_altitude_m = ~;
+    data_bme_pressure_hPa = bme.readPressure() / 100.0F;
+    data_bme_temperature_degC = bme.readTemperature();
+    data_bme_altitude_m = bme.readAltitude(SEALEVELPRESSURE_HPA);
   }
 
   // 常に実行する処理
