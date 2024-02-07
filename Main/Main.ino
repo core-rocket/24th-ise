@@ -9,24 +9,26 @@ uint32_t data_gnss_latitude_udeg = 0;
 uint32_t data_gnss_longitude_udeg = 0;
 float data_bat_v = 0;
 float data_ext_v = 0;
+bool data_key_sw_active = false;
 
 // pinout
-const uint8_t BNO_SDA = 4;
-const uint8_t BNO_SCL = 5;
-const uint8_t VALVE_TX = 6;
-const uint8_t VALVE_RX = 7;
-const uint8_t ES920_TX = 8;
-const uint8_t ES920_RX = 9;
-const uint8_t BME_SDA = 10;
-const uint8_t BME_SCL = 11;
-const uint8_t E220_TX = 12;
-const uint8_t E220_RX = 13;
-const uint8_t GNSS_TX = 14;
-const uint8_t GNSS_RX = 15;
-const uint8_t KEY_SW = 20;
-const uint8_t SERVO = 21;
-const uint8_t EXT_V = 26;
-const uint8_t BAT_V = 27;
+const pin_size_t BNO_SDA = 4;
+const pin_size_t BNO_SCL = 5;
+const pin_size_t VALVE_TX = 6;
+const pin_size_t VALVE_RX = 7;
+const pin_size_t ES920_TX = 8;
+const pin_size_t ES920_RX = 9;
+const pin_size_t BME_SDA = 10;
+const pin_size_t BME_SCL = 11;
+const pin_size_t E220_TX = 12;
+const pin_size_t E220_RX = 13;
+const pin_size_t GNSS_TX = 14;
+const pin_size_t GNSS_RX = 15;
+const pin_size_t KEY_SW = 20;
+// const pin_size_t SERVO_1 = 21;
+// const pin_size_t SERVO_2 = 22;
+const pin_size_t EXT_V = 26;
+const pin_size_t BAT_V = 27;
 
 // Servo
 
@@ -40,7 +42,7 @@ const uint8_t BAT_V = 27;
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
-sensors_event_t  accelerometerData;
+sensors_event_t accelerometerData;
 
 // BME280
 #include <Adafruit_BME280.h>
@@ -56,10 +58,16 @@ SerialPIO Serial_GNSS(GNSS_TX, GNSS_RX, 512);
 // ES920LR
 #define Serial_ES920 Serial2
 // https://moyoi-memo.hatenablog.com/entry/2022/02/15/112100
+String downlink = "";
+String response = "";
+bool need_response_usb = false;
+bool need_response_es920 = false;
 
 // W25Q128
 
-
+// Opener
+#include "myOpener.h"
+MY_OPENER opener(OPENER::SHINSASYO);
 
 // setup()ではdelay()使用可
 void setup() {
@@ -70,16 +78,14 @@ void setup() {
 
   Wire.setSDA(BNO_SDA);
   Wire.setSCL(BNO_SCL);
-  while (!bno.begin())
-  {
+  while (!bno.begin()) {
     Serial.print("BNO055 ERR");
     delay(100);
   }
-  
+
   Wire1.setSDA(BME_SDA);
   Wire1.setSCL(BME_SCL);
-  while (!bme.begin(0x76, &Wire1))
-  {
+  while (!bme.begin(0x76, &Wire1)) {
     Serial.print("BME280 ERR");
     delay(100);
   }
@@ -89,8 +95,7 @@ void setup() {
     Adafruit_BME280::SAMPLING_X2,
     Adafruit_BME280::SAMPLING_NONE,
     Adafruit_BME280::FILTER_X16,
-    Adafruit_BME280::STANDBY_MS_0_5
-  );
+    Adafruit_BME280::STANDBY_MS_0_5);
 
   analogReadResolution(12);
   pinMode(KEY_SW, INPUT);
@@ -99,8 +104,13 @@ void setup() {
   Serial_ES920.setRX(ES920_RX);
   Serial_ES920.setFIFOSize(64);
   Serial_ES920.begin(115200);
+  while (Serial_ES920.available()) {
+    Serial_ES920.read();
+  }
 
   Serial_GNSS.begin(9600);
+
+  opener.init();
 }
 
 // loop()と，ここから呼び出される関数ではdelay()使用禁止
@@ -115,40 +125,52 @@ void loop() {
       count_10Hz = 0;
 
       // 10Hzで実行する処理
-      // フライト = 回路としてOPEN = LOW
-      bool key_sw_active = (digitalRead(KEY_SW)==LOW);
+
       data_bat_v = analogRead(BAT_V) * 3.3 * 11 / (1 << 12);
       data_ext_v = analogRead(EXT_V) * 3.3 * 11 / (1 << 12);
 
+      // フライト = 回路としてOPEN = LOW
+      // バッテリー駆動でなくUSB駆動の場合常にLOWなので除外
+      data_key_sw_active = (digitalRead(KEY_SW) == LOW) && data_bat_v > 1;
+      if (data_key_sw_active) {
+        opener.goREADY();
+      }
+
       // デバッグ出力
-      Serial.print("BNO055, ");
-      Serial.print(data_bno_accel_x_mss);
-      Serial.print(", ");
-      Serial.print(data_bno_accel_y_mss);
-      Serial.print(", ");
-      Serial.print(data_bno_accel_z_mss);
-      Serial.print(", ");
+      if (need_response_usb) {
+        Serial.println("response:" + response);
+        need_response_usb = false;
+      } else {
+        Serial.println(downlink);
+      }
+      // Serial.print("BNO055, ");
+      // Serial.print(data_bno_accel_x_mss);
+      // Serial.print(", ");
+      // Serial.print(data_bno_accel_y_mss);
+      // Serial.print(", ");
+      // Serial.print(data_bno_accel_z_mss);
+      // Serial.print(", ");
 
-      Serial.print("BME280, ");
-      Serial.print(data_bme_pressure_hPa);
-      Serial.print(", ");
-      Serial.print(data_bme_temperature_degC);
-      Serial.print(", ");
-      Serial.print(data_bme_altitude_m);
-      Serial.print(", ");
+      // Serial.print("BME280, ");
+      // Serial.print(data_bme_pressure_hPa);
+      // Serial.print(", ");
+      // Serial.print(data_bme_temperature_degC);
+      // Serial.print(", ");
+      // Serial.print(data_bme_altitude_m);
+      // Serial.print(", ");
 
-      Serial.print("GNSS, ");
-      Serial.print(data_gnss_latitude_udeg);
-      Serial.print(", ");
-      Serial.print(data_gnss_latitude_udeg);
-      Serial.print(", ");
+      // Serial.print("GNSS, ");
+      // Serial.print(data_gnss_latitude_udeg);
+      // Serial.print(", ");
+      // Serial.print(data_gnss_latitude_udeg);
+      // Serial.print(", ");
 
-      Serial.print("voltage, ");
-      Serial.print(data_bat_v);
-      Serial.print(", ");
-      Serial.print(data_ext_v);
-      Serial.print(", ");
-      Serial.print("\n");
+      // Serial.print("voltage, ");
+      // Serial.print(data_bat_v);
+      // Serial.print(", ");
+      // Serial.print(data_ext_v);
+      // Serial.print(", ");
+      // Serial.print("\n");
     }
 
     // 100Hzで実行する処理
@@ -164,6 +186,8 @@ void loop() {
     data_bme_pressure_hPa = bme.readPressure() / 100.0F;
     data_bme_temperature_degC = bme.readTemperature();
     data_bme_altitude_m = bme.readAltitude(SEALEVELPRESSURE_HPA);
+
+    bool new_judge = opener.opener_100Hz(-data_bno_accel_z_mss, data_bme_altitude_m);
   }
 
   // 常に実行する処理
@@ -175,5 +199,85 @@ void loop() {
       data_gnss_latitude_udeg = gps.location.lat() * 1000000;
       data_gnss_longitude_udeg = gps.location.lng() * 1000000;
     }
+  }
+
+  // テレメトリ生成
+  downlink = "";
+  switch (opener.mode) {
+    case OPENER::CHECK:
+      downlink += 'C';
+      break;
+    case OPENER::READY:
+      downlink += 'R';
+      break;
+    case OPENER::FLIGHT:
+      downlink += 'F';
+      break;
+    case OPENER::OPENED:
+      downlink += 'O';
+      break;
+  }
+  downlink += opener.open_judge.prohibitOpen ? 'E' : '/';       // Emergency
+  downlink += opener.open_judge.apogee_time ? 'T' : '/';        // Time
+  downlink += opener.open_judge.apogee_descending ? 'P' : '/';  // Pressure
+  downlink += opener.open_judge.meco_time ? 'T' : '/';          // Time
+  downlink += opener.open_judge.meco_acc ? 'A' : '/';           // Acceleration
+  if (opener.lift_off_judge == OPENER::NONE) {
+    downlink += '/';
+  }
+  if (opener.lift_off_judge == OPENER::ACCSEN) {
+    downlink += 'A';
+  }
+  if (opener.lift_off_judge == OPENER::ALTSEN) {
+    downlink += 'P';
+  }
+  downlink += data_key_sw_active ? 'K' : '/';           // Key
+  downlink += String(data_bno_accel_z_mss, 1) + ',';
+  downlink += String(data_bme_temperature_degC, 1) + ',';
+  downlink += String(data_bme_altitude_m, 1) + ',';
+  downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
+  downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
+  downlink += String(data_bat_v, 2) + ',';
+  downlink += String(data_ext_v, 1) + ',';
+
+  // テレメトリダウンリンク
+  const uint32_t downlink_rate_ms = 1000;
+  static uint32_t last_downlink_ms = 0;
+  if (millis() - last_downlink_ms > downlink_rate_ms) {
+    last_downlink_ms = millis();
+    if (need_response_es920) {
+      Serial_ES920.print("response:" + response + "\r\n");
+      need_response_es920 = false;
+    } else {
+      Serial_ES920.print(downlink + "\r\n");
+    }
+  }
+
+  // コマンドアップリンク
+  while (Serial.available()) {
+    String uplink = Serial.readStringUntil('\n');
+    if (uplink == "emst") {
+      opener.prohibitOpen();
+    }
+    if (uplink == "clr") {
+      opener.clear_prohibitOpen();
+    }
+    if (uplink == "open") {
+      opener.manualOpen();
+    }
+    if (uplink == "close") {
+      opener.manualClose();
+    }
+    if (uplink == "check") {
+      opener.goCHECK();
+    }
+    if (uplink == "ready") {
+      opener.goREADY();
+    }
+
+    opener.set_open_threshold_time_ms(uplink.toFloat() * 1000);
+    response = "open:" + String((float)opener.get_open_threshold_time_ms() / 1000.0, 2);
+    need_response_usb = true;
+    need_response_es920 = true;
   }
 }
