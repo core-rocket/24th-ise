@@ -162,7 +162,7 @@ void loop() {
       // Serial.print("GNSS, ");
       // Serial.print(data_gnss_latitude_udeg);
       // Serial.print(", ");
-      // Serial.print(data_gnss_latitude_udeg);
+      // Serial.print(data_gnss_longitude_udeg);
       // Serial.print(", ");
 
       // Serial.print("voltage, ");
@@ -236,7 +236,7 @@ void loop() {
   downlink += String(data_bme_temperature_degC, 1) + ',';
   downlink += String(data_bme_altitude_m, 1) + ',';
   downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
-  downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
+  downlink += String(data_gnss_longitude_udeg % 1000000) + ',';
   downlink += String(data_bat_v, 2) + ',';
   downlink += String(data_ext_v, 1) + ',';
 
