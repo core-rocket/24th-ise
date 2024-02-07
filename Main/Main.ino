@@ -231,7 +231,7 @@ void loop() {
   if (opener.lift_off_judge == OPENER::ALTSEN) {
     downlink += 'P';
   }
-  downlink += data_key_sw_active ? 'K' : '/';           // Key
+  downlink += data_key_sw_active ? 'K' : '/';  // Key
   downlink += String(data_bno_accel_z_mss, 1) + ',';
   downlink += String(data_bme_temperature_degC, 1) + ',';
   downlink += String(data_bme_altitude_m, 1) + ',';
@@ -275,9 +275,12 @@ void loop() {
       opener.goREADY();
     }
 
-    opener.set_open_threshold_time_ms(uplink.toFloat() * 1000);
-    response = "open:" + String((float)opener.get_open_threshold_time_ms() / 1000.0, 2);
-    need_response_usb = true;
-    need_response_es920 = true;
+    float uplink_float = uplink.toFloat();
+    if (uplink_float != 0) {
+      opener.set_open_threshold_time_ms(uplink_float * 1000);
+      response = "open:" + String((float)opener.get_open_threshold_time_ms() / 1000.0, 2);
+      need_response_usb = true;
+      need_response_es920 = true;
+    }
   }
 }
