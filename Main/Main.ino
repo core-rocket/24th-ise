@@ -132,8 +132,8 @@ void loop() {
       // フライト = 回路としてOPEN = LOW
       // バッテリー駆動でなくUSB駆動の場合常にLOWなので除外
       data_key_sw_active = (digitalRead(KEY_SW) == LOW) && data_bat_v > 1;
-      if (data_key_sw_active) {
-        opener.goREADY();
+      if (data_key_sw_active && opener.mode == OPENER::CHECK) {
+        // opener.goREADY();
       }
 
       // デバッグ出力
@@ -238,7 +238,7 @@ void loop() {
   downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
   downlink += String(data_gnss_longitude_udeg % 1000000) + ',';
   downlink += String(data_bat_v, 2) + ',';
-  downlink += String(data_ext_v, 1) + ',';
+  downlink += String(data_ext_v, 1);
 
   // テレメトリダウンリンク
   const uint32_t downlink_rate_ms = 1000;
@@ -278,7 +278,7 @@ void loop() {
     float uplink_float = uplink.toFloat();
     if (uplink_float != 0) {
       opener.set_open_threshold_time_ms(uplink_float * 1000);
-      response = "open:" + String((float)opener.get_open_threshold_time_ms() / 1000.0, 2);
+      response = "open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2);
       need_response_usb = true;
       need_response_es920 = true;
     }
