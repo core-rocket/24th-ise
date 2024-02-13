@@ -69,6 +69,11 @@ bool need_response_es920 = false;
 #include "myOpener.h"
 MY_OPENER opener(OPENER::SHINSASYO);
 
+// Valve
+char valve_mode = '/';
+SerialPIO Serial_Valve(VALVE_TX, VALVE_RX, 32);
+
+
 // setup()ではdelay()使用可
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -110,6 +115,7 @@ void setup() {
   }
 
   Serial_GNSS.begin(9600);
+  Serial_Valve.begin(115200);
 
   opener.init();
 }
@@ -133,12 +139,19 @@ void loop() {
       // フライト = 回路としてOPEN = LOW
       // バッテリー駆動でなくUSB駆動の場合常にLOWなので除外
       data_key_sw_active = (digitalRead(KEY_SW) == LOW) && data_bat_v > 1;
-      if (data_key_sw_active && opener.mode == OPENER::CHECK) {
+      static bool last_data_key_sw_active = false;
+      if (data_key_sw_active && !last_data_key_sw_active && opener.mode == OPENER::CHECK) {
         opener.goREADY();
       }
-      if (!data_key_sw_active) {
-        opener.goCHECK();
+      if (!data_key_sw_active && last_data_key_sw_active) {
+        if (opener.open_judge.prohibitOpen) {
+          opener.goCHECK();
+        } else {
+          opener.goCHECK();
+          opener.clear_prohibitOpen();
+        }
       }
+      last_data_key_sw_active = data_key_sw_active;
 
       // デバッグ出力
       if (need_response_usb) {
@@ -206,6 +219,11 @@ void loop() {
     }
   }
 
+  // バルブ電装状態受信
+  while (Serial_Valve.available()) {
+    valve_mode = Serial_Valve.read();
+  }
+
 
   // テレメトリ生成
   downlink = "";
@@ -237,14 +255,15 @@ void loop() {
   if (opener.lift_off_judge == OPENER::ALTSEN) {
     downlink += 'P';
   }
+  downlink += valve_mode;
   downlink += String(data_key_sw_active ? 'K' : '/') + ',';  // Key
   downlink += String(data_bno_accel_z_mss, 1) + ',';
   downlink += String(data_bme_temperature_degC, 1) + ',';
   downlink += String(data_bme_altitude_m, 1) + ',';
   downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
   downlink += String(data_gnss_longitude_udeg % 1000000) + ',';
-  downlink += String(data_bat_v, 2) + ',';
-  downlink += String(data_ext_v, 1);
+  downlink += String(data_bat_v, 1) + ',';
+  downlink += String((int)data_ext_v);
 
   // テレメトリダウンリンク
   const uint32_t downlink_rate_ms = 2000;
@@ -268,6 +287,7 @@ void loop() {
   if (Serial_ES920.available()) {
     uplink = Serial_ES920.readStringUntil('\n');
   }
+  uplink.trim();
 
   if (uplink.indexOf("NG") == 0) {
     Serial.println(uplink);
@@ -280,17 +300,24 @@ void loop() {
     opener.clear_prohibitOpen();
   }
   if (uplink == "open") {
+    opener.goCHECK();
+    opener.clear_prohibitOpen();
     opener.manualOpen();
   }
   if (uplink == "close") {
+    opener.goCHECK();
     opener.manualClose();
   }
-  // if (uplink == "check") {
-  //   opener.goCHECK();
-  // }
-  // if (uplink == "ready") {
-  //   opener.goREADY();
-  // }
+  if (uplink == "check") {
+    opener.goCHECK();
+  }
+  if (uplink == "ready") {
+    opener.goREADY();
+  }
+
+  if (uplink == "drain") {
+    Serial_Valve.print("drain\n");
+  }
 
   float uplink_float = uplink.toFloat();
   if (uplink_float != 0) {
