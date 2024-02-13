@@ -315,8 +315,17 @@ void loop() {
     opener.goREADY();
   }
 
-  if (uplink == "drain") {
-    Serial_Valve.print("drain\n");
+  if (uplink == "drain-start") {
+    Serial_Valve.print("drain-start\n");
+  }
+  if (uplink == "drain-stop") {
+    Serial_Valve.print("drain-stop\n");
+  }
+  if (uplink == "valve") {
+    Serial_Valve.print("valve\n");
+  }
+  if (uplink == "valve-check") {
+    Serial_Valve.print("valve-check\n");
   }
 
   float uplink_float = uplink.toFloat();
