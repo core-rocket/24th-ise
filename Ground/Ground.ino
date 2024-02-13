@@ -58,6 +58,7 @@ void loop() {
   if (mode == SENDING) {
     if (Serial_ES920.available()) {
       String response = Serial_ES920.readStringUntil('\n');
+      response.trim();
       mode = FREE;
       Serial.print("response from ES920LR:");
       Serial.println(response);
