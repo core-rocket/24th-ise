@@ -54,6 +54,7 @@ void setup() {
   Servo_write(PIN_Valve, close_deg);
 
   Serial.begin(115200);
+  Serial1.begin(115200);
   delay(500);
 
   analogReadResolution(12);
@@ -66,6 +67,25 @@ void loop() {
 
   bool twe_valve = false;
   bool twe_drain = false;
+
+  while (Serial1.available()) {
+    String data = Serial1.readStringUntil('\n');
+    data.trim();
+
+    if (data == "drain-start") {
+      es_drain_start = true;
+    }
+    if (data == "drain-stop") {
+      es_drain_stop = true;
+    }
+    if (data == "valve") {
+      es_valve = true;
+    }
+    if (data == "valve-check") {
+      mode = CHECK;
+      checkmode_enter_time = millis();
+    }
+  }
 
   if (digitalRead(TWE_Valve) == LOW) {
     count_TWE_Valve++;
@@ -180,6 +200,30 @@ void loop() {
 
     default:
       break;
+  }
+
+  static uint32_t last_send_ms = 0;
+  if (millis() - last_send_ms > 50) {
+    last_send_ms = millis();
+    switch (mode) {
+      case STANDBY:
+        Serial1.write('/');
+        break;
+      case CHECK:
+        Serial1.write('C');
+        break;
+      case VALVE:
+        Serial1.write('V');
+        break;
+      case TWE_DRAIN:
+        Serial1.write('D');
+        break;
+      case ES_DRAIN:
+        Serial1.write('d');
+        break;
+      default:
+        break;
+    }
   }
 }
 
