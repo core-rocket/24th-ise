@@ -266,7 +266,7 @@ void loop() {
   downlink += String((int)data_ext_v);
 
   // テレメトリダウンリンク
-  const uint32_t downlink_rate_ms = 2000;
+  const uint32_t downlink_rate_ms = 2500;
   static uint32_t last_downlink_ms = 0;
   if (millis() - last_downlink_ms > downlink_rate_ms) {
     last_downlink_ms = millis();
@@ -288,6 +288,10 @@ void loop() {
     uplink = Serial_ES920.readStringUntil('\n');
   }
   uplink.trim();
+  // if (uplink != "") {
+  //   Serial.print("uplink:");
+  //   Serial.println(uplink);
+  // }
 
   if (uplink.indexOf("NG") == 0) {
     Serial.println(uplink);

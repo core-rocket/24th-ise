@@ -1,7 +1,16 @@
 #define Serial_ES920 Serial1
+bool need_uplink = false;
+String uplink_string = "";
+typedef enum {
+  SENDING,
+  FREE
+} MODE;
+MODE mode = FREE;
+unsigned long int send_millis = millis();
+unsigned long int timeout_ms = 3000;
 
 void setup() {
-  
+
   //Serial.setFIFOSize(64);
   Serial.begin(115200);
 
@@ -12,16 +21,18 @@ void setup() {
 }
 
 void loop() {
-  
+
   while (Serial.available()) {
-    char c = (char)Serial.read();
-    Serial_ES920.write(c);
-    // Serial.write(c);
+    uplink_string = Serial.readStringUntil('\n');
+    uplink_string.trim();
+    need_uplink = true;
   }
 
-  if (Serial_ES920.available()) {
+  if ((mode == FREE) && Serial_ES920.available()) {
     String downlink = Serial_ES920.readStringUntil('\n');
-    downlink.remove(downlink.length() - 1);
+    // Serial.print("raw:");
+    // Serial.println(downlink);
+    downlink.trim();
 
     char rssi_char[] = "FFFF";
     downlink.substring(0, 4).toCharArray(rssi_char, 5);
@@ -32,6 +43,29 @@ void loop() {
     Serial.print(rssi_long);
     Serial.print(",");
     Serial.println(downlink_ASCII);
+
+    if (need_uplink) {
+      delay(50);
+      need_uplink = false;
+      Serial_ES920.println(uplink_string);
+      mode = SENDING;
+      send_millis = millis();
+      Serial.print("uplink ");
+      Serial.println(uplink_string);
+    }
+  }
+
+  if (mode == SENDING) {
+    if (Serial_ES920.available()) {
+      String response = Serial_ES920.readStringUntil('\n');
+      mode = FREE;
+      Serial.print("response from ES920LR:");
+      Serial.println(response);
+    }
+    if (millis() - send_millis > timeout_ms) {
+      mode = FREE;
+      Serial.print("timeout");
+    }
   }
 }
 
@@ -63,7 +97,7 @@ long rssi(char *_rssi_char) {
 // Output Power                : 13dBm
 // Format                      : ASCII
 // Send Time                   : 0
-// Send Data                   : 
+// Send Data                   :
 // AES Key                     : 00000000000000000000000000000000
 // RF Mode                     : TxRx
 // Protocol Type               : Private LoRa
