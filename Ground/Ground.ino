@@ -1,7 +1,7 @@
 #define Serial_ES920 Serial1
 
 void setup() {
-  // put your setup code here, to run once:
+  
   //Serial.setFIFOSize(64);
   Serial.begin(115200);
 
@@ -12,17 +12,32 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if (Serial.available()) {
+  
+  while (Serial.available()) {
     char c = (char)Serial.read();
     Serial_ES920.write(c);
     // Serial.write(c);
   }
 
   if (Serial_ES920.available()) {
-    char c = (char)Serial_ES920.read();
-    Serial.write(c);
+    String downlink = Serial_ES920.readStringUntil('\n');
+    downlink.remove(downlink.length() - 1);
+
+    char rssi_char[] = "FFFF";
+    downlink.substring(0, 4).toCharArray(rssi_char, 5);
+    long rssi_long = rssi(rssi_char);
+
+    String downlink_ASCII = downlink.substring(4, downlink.length());
+
+    Serial.print(rssi_long);
+    Serial.print(",");
+    Serial.println(downlink_ASCII);
   }
+}
+
+long rssi(char *_rssi_char) {
+  char *e;
+  return strtol(_rssi_char, &e, 16) - 65536;
 }
 
 // GROUND
