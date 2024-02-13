@@ -55,6 +55,9 @@ void setup() {
 
   Serial.begin(115200);
   Serial1.begin(115200);
+  while (Serial1.available()) {
+    Serial1.read();
+  }
   delay(500);
 
   analogReadResolution(12);
