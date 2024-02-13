@@ -73,6 +73,7 @@ MY_OPENER opener(OPENER::SHINSASYO);
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
   // デバッグ出力
   Serial.begin(115200);
 
@@ -133,7 +134,10 @@ void loop() {
       // バッテリー駆動でなくUSB駆動の場合常にLOWなので除外
       data_key_sw_active = (digitalRead(KEY_SW) == LOW) && data_bat_v > 1;
       if (data_key_sw_active && opener.mode == OPENER::CHECK) {
-        // opener.goREADY();
+        opener.goREADY();
+      }
+      if (!data_key_sw_active) {
+        opener.goCHECK();
       }
 
       // デバッグ出力
@@ -190,6 +194,7 @@ void loop() {
     bool new_judge = opener.opener_100Hz(-data_bno_accel_z_mss, data_bme_altitude_m);
   }
 
+
   // 常に実行する処理
 
   // SAM-M8QのUARTを常に読み出し
@@ -200,6 +205,7 @@ void loop() {
       data_gnss_longitude_udeg = gps.location.lng() * 1000000;
     }
   }
+
 
   // テレメトリ生成
   downlink = "";
@@ -231,7 +237,7 @@ void loop() {
   if (opener.lift_off_judge == OPENER::ALTSEN) {
     downlink += 'P';
   }
-  downlink += data_key_sw_active ? 'K' : '/';  // Key
+  downlink += String(data_key_sw_active ? 'K' : '/') + ',';  // Key
   downlink += String(data_bno_accel_z_mss, 1) + ',';
   downlink += String(data_bme_temperature_degC, 1) + ',';
   downlink += String(data_bme_altitude_m, 1) + ',';
@@ -253,34 +259,44 @@ void loop() {
     }
   }
 
-  // コマンドアップリンク
-  while (Serial.available()) {
-    String uplink = Serial.readStringUntil('\n');
-    if (uplink == "emst") {
-      opener.prohibitOpen();
-    }
-    if (uplink == "clr") {
-      opener.clear_prohibitOpen();
-    }
-    if (uplink == "open") {
-      opener.manualOpen();
-    }
-    if (uplink == "close") {
-      opener.manualClose();
-    }
-    if (uplink == "check") {
-      opener.goCHECK();
-    }
-    if (uplink == "ready") {
-      opener.goREADY();
-    }
 
-    float uplink_float = uplink.toFloat();
-    if (uplink_float != 0) {
-      opener.set_open_threshold_time_ms(uplink_float * 1000);
-      response = "open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2);
-      need_response_usb = true;
-      need_response_es920 = true;
-    }
+  // コマンドアップリンク
+  String uplink = "";
+  if (Serial.available()) {
+    uplink = Serial.readStringUntil('\n');
+  }
+  if (Serial_ES920.available()) {
+    uplink = Serial_ES920.readStringUntil('\n');
+  }
+
+  if (uplink.indexOf("NG") == 0) {
+    Serial.println(uplink);
+  }
+
+  if (uplink == "emst") {
+    opener.prohibitOpen();
+  }
+  if (uplink == "clr") {
+    opener.clear_prohibitOpen();
+  }
+  if (uplink == "open") {
+    opener.manualOpen();
+  }
+  if (uplink == "close") {
+    opener.manualClose();
+  }
+  // if (uplink == "check") {
+  //   opener.goCHECK();
+  // }
+  // if (uplink == "ready") {
+  //   opener.goREADY();
+  // }
+
+  float uplink_float = uplink.toFloat();
+  if (uplink_float != 0) {
+    opener.set_open_threshold_time_ms(uplink_float * 1000);
+    response = "open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2);
+    need_response_usb = true;
+    need_response_es920 = true;
   }
 }
