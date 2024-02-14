@@ -15,7 +15,7 @@
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
 uint32_t period_pwmclk = 25000;  //value of period cycles **CPU clock 125MHz**
-const float open_deg = 45;
+const float open_deg = 30;
 const float close_deg = -45;
 
 bool need_over_close = true;
