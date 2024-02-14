@@ -6,8 +6,8 @@ typedef enum {
   FREE
 } MODE;
 MODE mode = FREE;
-unsigned long int send_millis = millis();
-unsigned long int timeout_ms = 3000;
+uint32_t send_millis = millis();
+uint32_t timeout_ms = 3000;
 
 void setup() {
 
@@ -36,7 +36,7 @@ void loop() {
 
     char rssi_char[] = "FFFF";
     downlink.substring(0, 4).toCharArray(rssi_char, 5);
-    long rssi_long = rssi(rssi_char);
+    int16_t rssi_long = rssi(rssi_char);
 
     String downlink_ASCII = downlink.substring(4, downlink.length());
 
@@ -70,7 +70,7 @@ void loop() {
   }
 }
 
-long rssi(char *_rssi_char) {
+int16_t rssi(char *_rssi_char) {
   char *e;
   return strtol(_rssi_char, &e, 16) - 65536;
 }

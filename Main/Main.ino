@@ -263,7 +263,7 @@ void loop() {
   downlink += String(data_gnss_latitude_udeg % 1000000) + ',';
   downlink += String(data_gnss_longitude_udeg % 1000000) + ',';
   downlink += String(data_bat_v, 1) + ',';
-  downlink += String((int)data_ext_v);
+  downlink += String(static_cast<int>(data_ext_v));
 
   // テレメトリダウンリンク
   const uint32_t downlink_rate_ms = 2500;

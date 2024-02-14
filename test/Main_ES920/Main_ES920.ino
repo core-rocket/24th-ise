@@ -19,13 +19,11 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (Serial.available()) {
-    char c = (char)Serial.read();
-    Serial_ES920.write(c);
+    Serial_ES920.write(Serial.read());
   }
 
   if (Serial_ES920.available()) {
-    char c = (char)Serial_ES920.read();
-    Serial.write(c);
+    Serial.write(Serial_ES920.read());
   }
 }
 
@@ -52,5 +50,5 @@ void loop() {
 //   Output Power                : 13dBm
 //   Format                      : ASCII
 //   Send Time                   : 0
-//   Send Data                   : 
+//   Send Data                   :
 //   AES Key                     : 00000000000000000000000000000000
