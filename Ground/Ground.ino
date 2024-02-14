@@ -10,7 +10,6 @@ uint32_t send_millis = millis();
 uint32_t timeout_ms = 3000;
 
 void setup() {
-
   //Serial.setFIFOSize(64);
   Serial.begin(115200);
 
@@ -21,7 +20,6 @@ void setup() {
 }
 
 void loop() {
-
   while (Serial.available()) {
     uplink_string = Serial.readStringUntil('\n');
     uplink_string.trim();
