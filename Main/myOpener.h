@@ -42,9 +42,9 @@ public:
         shinsasyo_ALT_threshold_count = 2;
 
         //! 離床判定後，燃焼中と判断し開放判定を行わない時間[ms]
-        meco_threshold_time_ms = 10000;
+        meco_threshold_time_ms = 5000;
         //! 開放機構の動作にかかる時間を引いた，離床から開放までの時間のシム値[ms]の初期値
-        open_threshold_time_ms = 19000;
+        open_threshold_time_ms = 13000;
 
         //! パラメータをFMと審査書で切り替える
         switch_parameter(setting);
