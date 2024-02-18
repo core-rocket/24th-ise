@@ -109,8 +109,6 @@ jobs:
           version: latest
         - name: Adafruit BME280 Library
           version: latest
-        - name: Adafruit BNO055
-          version: latest
         - name: TinyGPSPlus
           version: latest
         - source-url: https://github.com/uChip/MCP342X.git
