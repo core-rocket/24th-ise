@@ -39,8 +39,8 @@ const pin_size_t BAT_V = 27;
 // BNO055
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
+#include "Adafruit_BNO055.h"
+#include "utility/imumaths.h"
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
 sensors_event_t accelerometerData;
 
@@ -88,6 +88,15 @@ void setup() {
     Serial.print("BNO055 ERR");
     delay(100);
   }
+  bno.setMode(OPERATION_MODE_CONFIG);
+  delay(25);
+  uint8_t savePageID = bno.read8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR);
+  bno.write8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR, 0X01);
+  bno.write8(Adafruit_BNO055::BNO055_ACCEL_DATA_X_LSB_ADDR, 0X17); // page2なのでホントはACC_DATA_X_LSBではなくACC_DATA_X_LSBにアクセス
+  delay(10);
+  bno.write8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR, savePageID);
+  bno.setMode(OPERATION_MODE_ACCONLY);
+  delay(20);
 
   Wire1.setSDA(BME_SDA);
   Wire1.setSCL(BME_SCL);
