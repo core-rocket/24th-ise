@@ -12,6 +12,8 @@ float data_ext_v = 0;
 bool data_key_sw_active = false;
 
 // pinout
+const pin_size_t MIF_TX = 2;
+const pin_size_t MIF_RX = 3;
 const pin_size_t BNO_SDA = 4;
 const pin_size_t BNO_SCL = 5;
 const pin_size_t VALVE_TX = 6;
@@ -73,6 +75,8 @@ MY_OPENER opener(OPENER::SHINSASYO);
 char valve_mode = '/';
 SerialPIO Serial_Valve(VALVE_TX, VALVE_RX, 32);
 
+// MissionInterface
+SerialPIO Serial_MIF(MIF_TX, MIF_RX, 256);
 
 // setup()ではdelay()使用可
 void setup() {
@@ -125,6 +129,7 @@ void setup() {
 
   Serial_GNSS.begin(9600);
   Serial_Valve.begin(115200);
+  Serial_MIF.begin(115200);
 
   opener.init();
 }
@@ -339,6 +344,13 @@ void loop() {
   }
   if (uplink == "valve-check") {
     Serial_Valve.print("valve-check\n");
+  }
+
+  if (uplink == "mif-on") {
+    Serial_MIF.print("mif-on\n");
+  }
+  if (uplink == "mif-off") {
+    Serial_MIF.print("mif-off\n");
   }
 
   float uplink_float = uplink.toFloat();

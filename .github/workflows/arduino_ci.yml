@@ -147,6 +147,14 @@ jobs:
               arch: rp2040
               name: seeed_xiao_rp2040
 
+          - sketch-paths: MissionInterface
+            libraries: |
+              - 
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: seeed_xiao_rp2040
+
         include:
           - code:
               board:
