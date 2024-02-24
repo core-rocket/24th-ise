@@ -345,7 +345,7 @@ void loop() {
   if (uplink == "valve-check") {
     Serial_Valve.print("valve-check\n");
   }
-  
+
   if (uplink == "mif-on") {
     Serial_MIF.print("mif-on\n");
   }
