@@ -21,17 +21,16 @@ void setup() {
   // CAN
   CCP.begin();
 
-  if (!lps35hw.begin_I2C()) {
+  while (!lps35hw.begin_I2C(0x5C)) {
   //if (!lps35hw.begin_SPI(LPS_CS)) {
   //if (!lps35hw.begin_SPI(LPS_CS, LPS_SCK, LPS_MISO, LPS_MOSI)) {
     Serial.println("Couldn't find LPS35HW chip");
-    while (1);
+    delay(10);
   }
   lps35hw.setDataRate(LPS35HW_RATE_75_HZ);
 }
 
 void loop() {
-  CCP.float_to_device(0x82, lps35hw.readTemperature());
   CCP.float_to_device(0x80, lps35hw.readTemperature());
   CCP.float_to_device(0x81, lps35hw.readPressure());
   delay(10);
