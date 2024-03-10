@@ -36,6 +36,7 @@
 ### 依存関係
 - Wire.h
 - CCP.h
+- MCP342X.h[https://github.com/uChip/MCP342X]
 
 ## 基礎知識
 
