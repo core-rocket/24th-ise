@@ -19,7 +19,7 @@ CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 */  
 
 
-union uinonfloat{
+union unionfloat{
   float f;
   byte b[4];
 };
@@ -51,14 +51,12 @@ void loop() {
     latest_send_time = millis();//送信済みの時間を記録
     send_allowed = false;
   }
-  
-  delay(2000);
 }
 
 void GeneratePayload(byte* tx_payload,bool _payload_semapho){
   _payload_semapho = true;
   unionuint32 mcutime_ms;
-  uinonfloat buf;
+  unionfloat buf;
   CCP.read_device();
   mcutime_ms.i = millis();
   byte status_byte = 0x00;
