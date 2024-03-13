@@ -37,7 +37,7 @@ void loop() {
   static uint32_t time = 0;
   if (millis() - time >= 10) {
     time = millis();
-    CCP.float_to_device(CCP_surface_pressure6_pressure_pa, lps35hw.readTemperature());
+    CCP.float_to_device(CCP_surface_pressure1_pressure_pa, lps35hw.readPressure());
   }
 
   if (!digitalRead(CAN_INT))  // データ受信確認
