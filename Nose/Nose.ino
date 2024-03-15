@@ -16,7 +16,7 @@ CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 
 const int clockFrequency = 400000;  //I2C bus speed
 bool timer100Hz = false;
-bool timer1Hz=false; 
+bool timer1Hz=false;
 bool can_checkerflag = false;
 
 void setup() {
@@ -28,7 +28,6 @@ void setup() {
   bme.begin(0x76);
   myADC.configure(MCP342X_MODE_CONTINUOUS | MCP342X_CHANNEL_1 | MCP342X_SIZE_18BIT | MCP342X_GAIN_1X);
   CCP.begin();
-  
 }
 
 void loop() {
@@ -71,7 +70,7 @@ void loop() {
     CCP.string_to_device(CCP_nose_adc, adc_bytes);
     if(timer1Hz){
         CCP.string_to_device(CCP_nose_status, "OK");
-    }    
+    }
     //シリアル出力
     SerialPrintSensors(adc_bytes, temperature, barometic_pressure, voltage);
   }
