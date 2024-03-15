@@ -25,7 +25,7 @@ union unionuint32{
 
 void setup() {
   Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial1.begin(9600);//E220のUART
 }
 
@@ -84,11 +84,7 @@ void loop() {
   for (int i = 0; i < 4; i++){
     surface6_pressure.b[i] = rx_payload[i+47];
   }
-  Serial.print("time:");
-  Serial.print(millis());
-  // Serial.print(",Rx:");
-  // Serial.write(rx_payload,199);
-  // Serial.println("");
+
   if(Rxlength>0){
   Serial.print("RSSI[dBm]:");
   Serial.print(rssi);
@@ -113,13 +109,13 @@ void loop() {
   Serial.print(",");
   Serial.print(surface2_pressure.f,6);
   Serial.print(",");
-  Serial.print(surface3_pressure.f);
+  Serial.print(surface3_pressure.f,6);
   Serial.print(",");
-  Serial.print(surface4_pressure.f);
+  Serial.print(surface4_pressure.f,6);
   Serial.print(",");
-  Serial.println(surface5_pressure.f);
+  Serial.println(surface5_pressure.f,6);
   Serial.print(",");
-  Serial.println(surface6_pressure.f);
+  Serial.println(surface6_pressure.f,6);
   }else{
     Serial.println("");
   }
