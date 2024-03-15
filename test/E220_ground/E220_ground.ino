@@ -47,58 +47,41 @@ void loop() {
   unionfloat surface5_pressure;
   unionfloat surface6_pressure;
   byte status=0x00;
-  mcutime_ms.b[0] = rx_payload[0];
-  mcutime_ms.b[1] = rx_payload[1];
-  mcutime_ms.b[2] = rx_payload[2];
-  mcutime_ms.b[3] = rx_payload[3];
+  for (int i = 0; i < 4; i++){
+    mcutime_ms.b[i] = rx_payload[i];
+  }
   status = rx_payload[4];
-  nose_adc_raw[0] = rx_payload[5];
-  nose_adc_raw[1] = rx_payload[6];
-  nose_adc_raw[2] = rx_payload[7];
-  nose_adc_raw[3] = rx_payload[8];
-  nose_adc_raw[4] = rx_payload[9];
-  nose_adc_raw[5] = rx_payload[10];
-  nose_temperature.b[0] = rx_payload[11];
-  nose_temperature.b[1] = rx_payload[12];
-  nose_temperature.b[2] = rx_payload[13];
-  nose_temperature.b[3] = rx_payload[14];
-  nose_barometic_presure.b[0] = rx_payload[15];
-  nose_barometic_presure.b[1] = rx_payload[16];
-  nose_barometic_presure.b[2] = rx_payload[17];
-  nose_barometic_presure.b[3] = rx_payload[18];
-  nose_different_pressure.b[0] = rx_payload[19];
-  nose_different_pressure.b[1] = rx_payload[20];
-  nose_different_pressure.b[2] = rx_payload[21];
-  nose_different_pressure.b[3] = rx_payload[22];
-  nose_voltage.b[0] = rx_payload[23];
-  nose_voltage.b[1] = rx_payload[24];
-  nose_voltage.b[2] = rx_payload[25];
-  nose_voltage.b[3] = rx_payload[26];
-  surface1_pressure.b[0] = rx_payload[27];
-  surface1_pressure.b[1] = rx_payload[28];
-  surface1_pressure.b[2] = rx_payload[29];
-  surface1_pressure.b[3] = rx_payload[30];
-  surface2_pressure.b[0] = rx_payload[31];
-  surface2_pressure.b[1] = rx_payload[32];
-  surface2_pressure.b[2] = rx_payload[33];
-  surface2_pressure.b[3] = rx_payload[34];
-  surface3_pressure.b[0] = rx_payload[35];
-  surface3_pressure.b[1] = rx_payload[36];
-  surface3_pressure.b[2] = rx_payload[37];
-  surface3_pressure.b[3] = rx_payload[38];
-  surface4_pressure.b[0] = rx_payload[39];
-  surface4_pressure.b[1] = rx_payload[40];
-  surface4_pressure.b[2] = rx_payload[41];
-  surface4_pressure.b[3] = rx_payload[42];
-  surface5_pressure.b[0] = rx_payload[43];
-  surface5_pressure.b[1] = rx_payload[44];
-  surface5_pressure.b[2] = rx_payload[45];
-  surface5_pressure.b[3] = rx_payload[46];
-  surface6_pressure.b[0] = rx_payload[47];
-  surface6_pressure.b[1] = rx_payload[48];
-  surface6_pressure.b[2] = rx_payload[49];
-  surface6_pressure.b[3] = rx_payload[50];
-  Serial.print("mcutime_ms:");
-
-
+  for (int i = 0; i < 6; i++){
+    nose_adc_raw[i] = rx_payload[i+5];
+  }
+  for (int i = 0; i < 4; i++){
+    nose_temperature.b[i] = rx_payload[i+11];
+  }
+  for (int i = 0; i < 4; i++){
+    nose_barometic_presure.b[i] = rx_payload[i+15];
+  }
+  for (int i = 0; i < 4; i++){
+    nose_different_pressure.b[i] = rx_payload[i+19];
+  }
+  for (int i = 0; i < 4; i++){
+    nose_voltage.b[i] = rx_payload[i+23];
+  }
+  for (int i = 0; i < 4; i++){
+    surface1_pressure.b[i] = rx_payload[i+27];
+  }
+  for (int i = 0; i < 4; i++){
+    surface2_pressure.b[i] = rx_payload[i+31];
+  }
+  for (int i = 0; i < 4; i++){
+    surface3_pressure.b[i] = rx_payload[i+35];
+  }
+  for (int i = 0; i < 4; i++){
+    surface4_pressure.b[i] = rx_payload[i+39];
+  }
+  for (int i = 0; i < 4; i++){
+    surface5_pressure.b[i] = rx_payload[i+43];
+  }
+  for (int i = 0; i < 4; i++){
+    surface6_pressure.b[i] = rx_payload[i+47];
+  }
 }
