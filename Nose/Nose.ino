@@ -3,10 +3,8 @@
 #include <MCP342X.h>
 #include <CCP_MCP2515.h>
 
-bool can_avairable = true;
-
-#define CAN0_CS 0
-#define CAN0_INT 1
+#define CAN0_CS D0
+#define CAN0_INT D1
 #define LED_YELLOW LED_BUILTIN
 #define LED_BLUE PIN_LED_RXL
 
@@ -18,22 +16,19 @@ CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 
 const int clockFrequency = 400000;  //I2C bus speed
 bool timer100Hz = false;
-bool sleep_sensors = false;
+bool timer1Hz=false; 
 bool can_checkerflag = false;
-struct repeating_timer st_timer;
 
 void setup() {
-  Serial.begin(1843200);
-  Wire.setSDA(6);
-  Wire.setSCL(7);
+  Serial.begin(115200);
+  Wire.setSDA(6);//rp2040の場合は必要
+  Wire.setSCL(7);//rp2040の場合は必要
   Wire.setClock(clockFrequency);
   Wire.begin();
   bme.begin(0x76);
   myADC.configure(MCP342X_MODE_CONTINUOUS | MCP342X_CHANNEL_1 | MCP342X_SIZE_18BIT | MCP342X_GAIN_1X);
-  add_repeating_timer_us(10000, TimerIsr, NULL, &st_timer);  //100Hz
-  if (can_avairable) {
-    CCP.begin();
-  }
+  CCP.begin();
+  
 }
 
 void loop() {
@@ -42,54 +37,43 @@ void loop() {
   static float barometic_pressure = 0.0;
   static char adc_bytes[3] = { 0x00, 0x00, 0x00 };
   static double voltage = 0.0;
+  static uint32_t pretime_100Hz=0;
+  static uint32_t pretime_1Hz=0;
+
+  //100Hz用
+  if(millis()-pretime_100Hz>10){
+    timer100Hz=true;
+    pretime_100Hz=millis();
+  }else{
+    timer100Hz=false;
+  }
+  //1Hz用
+  if(millis()-pretime_1Hz>1000){
+    timer1Hz=true;
+    pretime_1Hz=millis();
+  }else{
+    timer1Hz=false;
+  }
+
   if (timer100Hz) {
     timer100Hz = false;
-    if (!sleep_sensors) {
-      //差圧センサ関連
-      myADC.startConversion();
-      myADC.getResult(&result);
-      DevideBytes(&result, adc_bytes);
-      ConvertToVoltage(adc_bytes, &voltage);  //3つのバイトを電圧に変換
-      //BME280関連
-      GetBME280Data(&temperature, &barometic_pressure);
-      //CAN送信
-      if (can_avairable) {
-        CCP.uint32_to_device(CCP_nose_adc, voltage);
-        CCP.float_to_device(CCP_nose_temperature, temperature);
-        CCP.float_to_device(CCP_nose_barometic_pressure, barometic_pressure);
-        if (can_checkerflag) {
-          CCP.string_to_device(CCP_nose_status, "OK");
-          can_checkerflag = false;
-        }
-      }
-      //シリアル出力
-      SerialPrintSensors(adc_bytes, temperature, barometic_pressure, voltage);
-    }
-  }
-  if (can_avairable) {
-    CCP.read_device();
-    switch (CCP.id) {
-      case CCP_EMST_mesure:
-        if (CCP.str_match("STOP", 4)) {
-          sleep_sensors = true;
-        } else if (CCP.str_match("CLEAR", 5)) {
-          sleep_sensors = false;
-        }
-        break;
-      case CCP_nose_adc:
-        if (CCP.str_match("CHECK", 5)) {
-          can_checkerflag = true;
-        }
-        if (CCP.str_match("KILL", 4)) {
-          sleep_sensors = true;
-        }
-        if (CCP.str_match("CLEAR", 5)) {
-          sleep_sensors = false;
-        }
-        break;
-      default:
-        break;
-    }
+    //差圧センサ関連
+    myADC.startConversion();
+    myADC.getResult(&result);
+    DevideBytes(&result, adc_bytes);
+    ConvertToVoltage(adc_bytes, &voltage);  //3つのバイトを電圧に変換
+    //BME280関連
+    GetBME280Data(&temperature, &barometic_pressure);
+    //CAN送信
+    CCP.float_to_device(CCP_nose_temperature, temperature);
+    CCP.float_to_device(CCP_nose_barometic_pressure, barometic_pressure);
+    CCP.float_to_device(CCP_nose_voltage, static_cast<float>(voltage));
+    CCP.string_to_device(CCP_nose_adc, adc_bytes);
+    if(timer1Hz){
+        CCP.string_to_device(CCP_nose_status, "OK");
+    }    
+    //シリアル出力
+    SerialPrintSensors(adc_bytes, temperature, barometic_pressure, voltage);
   }
 }
 
@@ -119,7 +103,6 @@ void ConvertToVoltage(char* bytes, double* voltage) {
 }
 
 void SerialPrintSensors(char* adc_bytes, float temperature, float barometic_pressure, double voltage) {
-  // if(timer100Hz) Serial.println("overrun");
   Serial.print("time:");
   Serial.print(micros());
   Serial.print(",adc_bytes:");
@@ -133,9 +116,4 @@ void SerialPrintSensors(char* adc_bytes, float temperature, float barometic_pres
   Serial.print(barometic_pressure, 10);
   Serial.print(",voltage:");
   Serial.println(voltage, 10);
-}
-
-bool TimerIsr(struct repeating_timer* t) {
-  timer100Hz = true;
-  return true;
 }
