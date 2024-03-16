@@ -54,7 +54,7 @@ void loop() {
   }
   if (send_allowed == true && payload_semapho == false) {
     Serial.println("send!");
-    e220.TransmissionDataVariebleLength(tx_payload,47);
+    e220.TransmissionData(tx_payload);
     latest_send_time = millis();  //送信済みの時間を記録
     send_allowed = false;
   }
@@ -85,7 +85,7 @@ void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
   tx_payload[21] = buf.b[2];
   tx_payload[22] = buf.b[3];
 
-  buf.f = 0.24565484466;
+  buf.f = 0.2;
   tx_payload[43] = buf.b[0];
   tx_payload[44] = buf.b[1];
   tx_payload[45] = buf.b[2];

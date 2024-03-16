@@ -38,7 +38,6 @@ union unionuint32 {
   byte b[4];
 };
 
-
 void setup() {
   Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
   Serial.begin(115200);
@@ -49,11 +48,12 @@ void loop() {
   static byte rx_payload[199] = { 0 };
   int rssi = 0;
   int Rxlength = 0;
-  Rxlength = e220.ReceiveDataVariebleLength(rx_payload,47,&rssi);//surface6_pressureまでの長さ
+  Rxlength = e220.ReceiveData(rx_payload, &rssi);
   unionuint32 mcutime_ms;
   byte nose_adc_raw[6] = { 0x00 };
   unionfloat nose_temperature;
   unionfloat nose_barometic_presure;
+  unionfloat nose_different_pressure;
   unionfloat nose_voltage;
   unionfloat surface1_pressure;
   unionfloat surface2_pressure;
@@ -76,25 +76,28 @@ void loop() {
     nose_barometic_presure.b[i] = rx_payload[i + 15];
   }
   for (int i = 0; i < 4; i++) {
-    nose_voltage.b[i] = rx_payload[i + 19];
+    nose_different_pressure.b[i] = rx_payload[i + 19];
   }
   for (int i = 0; i < 4; i++) {
-    surface1_pressure.b[i] = rx_payload[i + 23];
+    nose_voltage.b[i] = rx_payload[i + 23];
   }
   for (int i = 0; i < 4; i++) {
-    surface2_pressure.b[i] = rx_payload[i + 27];
+    surface1_pressure.b[i] = rx_payload[i + 27];
   }
   for (int i = 0; i < 4; i++) {
-    surface3_pressure.b[i] = rx_payload[i + 31];
+    surface2_pressure.b[i] = rx_payload[i + 31];
   }
   for (int i = 0; i < 4; i++) {
-    surface4_pressure.b[i] = rx_payload[i + 35];
+    surface3_pressure.b[i] = rx_payload[i + 35];
   }
   for (int i = 0; i < 4; i++) {
-    surface5_pressure.b[i] = rx_payload[i + 39];
+    surface4_pressure.b[i] = rx_payload[i + 39];
   }
   for (int i = 0; i < 4; i++) {
-    surface6_pressure.b[i] = rx_payload[i + 43];
+    surface5_pressure.b[i] = rx_payload[i + 43];
+  }
+  for (int i = 0; i < 4; i++) {
+    surface6_pressure.b[i] = rx_payload[i + 47];
   }
 
   if (Rxlength > 0) {
@@ -103,7 +106,7 @@ void loop() {
     Serial.print(",rocket_time_ms:");
     Serial.print(mcutime_ms.i);
     Serial.print(",status:");
-    StatusSerialPrint(status);
+    Serial.print(status);
     Serial.print(",");
     for (int i = 0; i < 6; i++) {
       Serial.print(nose_adc_raw[i]);
@@ -112,6 +115,8 @@ void loop() {
     Serial.print(nose_temperature.f, 6);
     Serial.print(",");
     Serial.print(nose_barometic_presure.f, 6);
+    Serial.print(",");
+    Serial.print(nose_different_pressure.f, 6);
     Serial.print(",");
     Serial.print(nose_voltage.f, 6);
     Serial.print(",");
@@ -123,20 +128,8 @@ void loop() {
     Serial.print(",");
     Serial.print(surface4_pressure.f, 6);
     Serial.print(",");
-    Serial.print(surface5_pressure.f, 6);
+    Serial.println(surface5_pressure.f, 6);
     Serial.print(",");
     Serial.println(surface6_pressure.f, 6);
-  }
+  } 
 }
-
-void StatusSerialPrint(byte _status){
-  for (int i = 0; i < 8; i++) {
-    if ((_status >> 7-i)& 0x01) {
-      Serial.print("1");
-    } else {
-      Serial.print("0");
-    }
-  }
-}
-
-
