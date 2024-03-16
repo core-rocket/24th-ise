@@ -4,7 +4,7 @@
 
 #define SEND_PERIOD_MS 1000
 
-E220 e220(0xFF, 0xFF, 0x00);  //TARGETADRESS=0xFFFF,CHANNEL=0x00
+E220 e220(0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A=10ch=ARIB 34-35
 
 /*E220configuration
 - UARTbaudrate:115200bps
@@ -15,6 +15,19 @@ E220 e220(0xFF, 0xFF, 0x00);  //TARGETADRESS=0xFFFF,CHANNEL=0x00
 - SF: TBD
 */
 
+/*------configuration------
+Address(HEX):00
+UARTBaudrate:115200bps
+SF:11
+BW:250kHz
+SubpacketLength:200bytes
+RSSINoise:Not Available
+TxPower:0dBm
+Channel:10
+RSSIByte:Available
+TxMethod:Transparent mode
+WORCycle:500ms
+-------------------------*/
 
 union unionfloat {
   float f;
@@ -25,12 +38,10 @@ union unionuint32 {
   byte b[4];
 };
 
-
-
 void setup() {
   Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
   Serial.begin(9600);
-  Serial1.begin(9600);  //E220のUART
+  Serial1.begin(115200);  //E220のUART
 }
 void loop() {
   static byte tx_payload[199] = { 0 };

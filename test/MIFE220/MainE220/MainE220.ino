@@ -6,7 +6,7 @@
 
 #define SEND_PERIOD_MS 1000//E220のダウンリンクの周期(ms)
 
-E220 e220(0xFF, 0xFF, 0x00);         //TARGETADRESS=0xFFFF,CHANNEL=0x00←あとでかえる
+E220 e220(0xFF, 0xFF, 0x0A);         //TARGETADRESS=0xFFFF,CHANNEL=0x0A
 CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 
 /*E220configuration
@@ -15,7 +15,7 @@ CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 - channel: 0x0A(ARIB 34-35)//審査書の値なので運営からの指示以外変更禁止
 - target address: 0xFFFF(broradcast)
 - power: 13dBm
-- SF: TBD
+- SF: 11
 */
 
 
