@@ -40,14 +40,14 @@ void loop() {
   static uint32_t pretime_1Hz=0;
 
   //100Hz用
-  if(millis()-pretime_100Hz>10){
+  if(millis()-pretime_100Hz>=10){
     timer100Hz=true;
     pretime_100Hz=millis();
   }else{
     timer100Hz=false;
   }
   //1Hz用
-  if(millis()-pretime_1Hz>1000){
+  if(millis()-pretime_1Hz>=1000){
     timer1Hz=true;
     pretime_1Hz=millis();
   }else{
