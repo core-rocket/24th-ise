@@ -34,7 +34,7 @@
 ### 回路
 <img src="images/circuit.png" width="100%">
 
-※CANの終端抵抗はTBD $\Omega$
+※CANの終端抵抗は120 $\Omega$
 
 ### PCB
 <img src="images/PCB1_ver2.png" width="300"><img src="images/PCB2.png" width="400">
