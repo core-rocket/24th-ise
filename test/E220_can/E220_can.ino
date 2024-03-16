@@ -97,80 +97,72 @@ void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
         status_byte |= 0b00000010;
       }
       break;
-    case CCP_nose_adc:
-      //todo adcの生データを16進数表示の文字列で送信
-
+    case CCP_nose_adc://自信ない
+      //adcの生データを16進数表示の文字列で送信
+      for (int i = 0; i < 6; i++) {
+        tx_payload[i + 5] = CCP.msg.string_msg.string[i];
+      }
       break;
     case CCP_nose_temperature:
       buf.f = CCP.data_float();
-      tx_payload[11] = buf.b[0];
-      tx_payload[12] = buf.b[1];
-      tx_payload[13] = buf.b[2];
-      tx_payload[14] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 11] = buf.b[i];
+      }
       break;
     case CCP_nose_barometic_pressure:
       buf.f = CCP.data_float();
-      tx_payload[15] = buf.b[0];
-      tx_payload[16] = buf.b[1];
-      tx_payload[17] = buf.b[2];
-      tx_payload[18] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 15] = buf.b[i];
+      }
       break;
     case CCP_nose_voltage:
       buf.f = CCP.data_float();
-      tx_payload[19] = buf.b[0];
-      tx_payload[20] = buf.b[1];
-      tx_payload[21] = buf.b[2];
-      tx_payload[22] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 19] = buf.b[i];
+      }
       break;
     case CCP_surface_pressure1_pressure_pa:
       buf.f = CCP.data_float();
-      tx_payload[23] = buf.b[0];
-      tx_payload[24] = buf.b[1];
-      tx_payload[25] = buf.b[2];
-      tx_payload[26] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 23] = buf.b[i];
+      }
       break;
     case CCP_surface_pressure2_pressure_pa:
       buf.f = CCP.data_float();
-      tx_payload[27] = buf.b[0];
-      tx_payload[28] = buf.b[1];
-      tx_payload[29] = buf.b[2];
-      tx_payload[30] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 27] = buf.b[i];
+      }
       break;
     case CCP_surface_pressure3_pressure_pa:
       buf.f = CCP.data_float();
-      tx_payload[31] = buf.b[0];
-      tx_payload[32] = buf.b[1];
-      tx_payload[33] = buf.b[2];
-      tx_payload[34] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 31] = buf.b[i];
+      }
       break;
     case CCP_surface_pressure4_pressure_pa:
       buf.f = CCP.data_float();
-      tx_payload[35] = buf.b[0];
-      tx_payload[36] = buf.b[1];
-      tx_payload[37] = buf.b[2];
-      tx_payload[38] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 35] = buf.b[i];
+      }
       break;
     case CCP_surface_pressure5_pressure_pa:
       buf.f = CCP.data_float();
-      tx_payload[39] = buf.b[0];
-      tx_payload[40] = buf.b[1];
-      tx_payload[41] = buf.b[2];
-      tx_payload[42] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 39] = buf.b[i];
+      }
       break;
     case CCP_surface_pressure6_pressure_pa:
       buf.f = CCP.data_float();
-      tx_payload[43] = buf.b[0];
-      tx_payload[44] = buf.b[1];
-      tx_payload[45] = buf.b[2];
-      tx_payload[46] = buf.b[3];
+      for (int i = 0; i < 4; i++) {
+        tx_payload[i + 43] = buf.b[i];
+      }
       break;
     default:
       break;
   }
-  tx_payload[0] = mcutime_ms.b[0];
-  tx_payload[1] = mcutime_ms.b[1];
-  tx_payload[2] = mcutime_ms.b[2];
-  tx_payload[3] = mcutime_ms.b[3];
+  for (int i = 0; i < 4; i++) {
+    tx_payload[i] =  mcutime_ms.b[i];
+  }
   tx_payload[4] = status_byte;
   _payload_semapho = false;
 }
