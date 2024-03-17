@@ -1,8 +1,12 @@
 # ノーズ電装
+<img src="images/front.jpg" width="300"><img src="images/back.jpg" width="300">
+
+<img src="images/in1.jpg" width="300"><img src="images/in2.jpg" width="300">
 
 ## 概要
-- This component has role of sensoring airspeed,temperature  and barometic pressure.
-- This component communicates with the main electrical compnent via the CAN protocol.
+- ピトー管で対気速度を測定する
+- BMEで温度と気圧を測定する
+- CANで他基板へデータを送信する
 ## ハードウェア
 ### BOM
 #### MCU
@@ -30,12 +34,18 @@
 ### 回路
 <img src="images/circuit.png" width="100%">
 
+※CANの終端抵抗は120 $\Omega$
+
 ### PCB
 <img src="images/PCB1_ver2.png" width="300"><img src="images/PCB2.png" width="400">
 ## ソフトウェア
 ### 依存関係
 - Wire.h
 - CCP.h
+- MCP342X.h[https://github.com/uChip/MCP342X]
+
+## 寸法
+<img src="images/1.png" width="300">
 
 ## 基礎知識
 
