@@ -48,7 +48,7 @@ void loop() {
     send_allowed = true;
   }
   if (send_allowed == true) {
-    e220.TransmissionData(tx_payload);
+    e220.TransmissionDataVariebleLength(tx_payload,47);
     latest_send_time = millis();  //送信済みの時間を記録
     send_allowed = false;
   }
