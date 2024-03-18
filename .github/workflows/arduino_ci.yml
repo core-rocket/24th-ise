@@ -82,7 +82,7 @@ jobs:
       with:
         github_token: ${{ secrets.github_token }}
         reporter: github-pr-review
-        flags: --extensions=h,hpp,c,cpp,cc,cu,hh,ipp,ino --exclude=./test/Nose/
+        flags: --extensions=h,hpp,c,cpp,cc,cu,hh,ipp,ino --exclude=./test/Nose/,./Main/utility/,./Main/Adafruit_BNO055.cpp,/Main/Adafruit_BNO055.h
         filter: "-readability/braces\
           ,-whitespace/braces\
           ,-whitespace/comments\
@@ -109,10 +109,11 @@ jobs:
           version: latest
         - name: Adafruit BME280 Library
           version: latest
-        - name: Adafruit BNO055
+        - name: TinyGPSPlus
           version: latest
         - source-url: https://github.com/uChip/MCP342X.git
         - source-url: https://github.com/core-rocket/CCP.git
+        - source-url: https://github.com/core-rocket/Opener.git
         - source-url: https://github.com/coryjfowler/MCP_CAN_lib.git
         - source-url: https://github.com/771-8bit/W25Q512.git
         - source-url: https://github.com/sdesalas/Arduino-Queue.h.git
@@ -139,6 +140,14 @@ jobs:
               name: seeed_xiao_rp2040
             
           - sketch-paths: Nose
+            libraries: |
+              - 
+            board:
+              vendor: rp2040
+              arch: rp2040
+              name: seeed_xiao_rp2040
+
+          - sketch-paths: MissionInterface
             libraries: |
               - 
             board:
