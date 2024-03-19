@@ -280,7 +280,7 @@ void loop() {
   downlink += String(static_cast<int>(data_ext_v));
 
   // テレメトリダウンリンク
-  const uint32_t downlink_rate_ms = 2500;
+  const uint32_t downlink_rate_ms = 5000;
   static uint32_t last_downlink_ms = 0;
   if (millis() - last_downlink_ms > downlink_rate_ms) {
     last_downlink_ms = millis();
