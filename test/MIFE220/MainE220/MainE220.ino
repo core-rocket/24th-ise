@@ -6,17 +6,11 @@
 
 #define SEND_PERIOD_MS 1000//E220のダウンリンクの周期(ms)
 
-E220 e220(0xFF, 0xFF, 0x0A);         //TARGETADRESS=0xFFFF,CHANNEL=0x0A
-CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
+#define PAYLOAD_SIZE 47
+#define ROCKET_INSIDE_PACKET_LETTER 0x4E
 
-/*E220configuration
-- UARTbaudrate:115200bps
-- bandwith: 250kHz//審査書の値なので運営からの指示以外変更禁止
-- channel: 0x0A(ARIB 34-35)//審査書の値なので運営からの指示以外変更禁止
-- target address: 0xFFFF(broradcast)
-- power: 13dBm
-- SF: 11
-*/
+E220 e220(Serial2,0xFF, 0xFF, 0x0A);         //TARGETADRESS=0xFFFF,CHANNEL=0x0A
+CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 
 
 union unionfloat {
@@ -33,7 +27,8 @@ union unionuint32 {
 void setup() {
   Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
   Serial.begin(9600);
-  Serial1.begin(115200);  //E220のUART
+  Serial1.begin(115200);  //MIFとつながってるUART
+  Serial2.begin(115200);  //E220のUART
   CCP.begin();
 }
 
@@ -41,10 +36,16 @@ void loop() {
   static byte tx_payload[199] = { 0 };//MIF基板から送られるbyte配列格納先
   static bool send_allowed = false;      //送信許可
   static uint32_t latest_send_time = 0;  //最後に送信した時間
+  static bool comingdata = false;        //MIF基板からデータが来ているか
 
-  //TODO:ここにMIF基板からのデータを受け取ってtx_payloadにいれる処理を書く
-  
-  if ((millis() - latest_send_time) > SEND_PERIOD_MS) {  //前の送信から一定時間経過しているか
+  //MIF基板からのデータを受け取ってtx_payloadにいれる処理
+  if(Serial1.readBytesUntil(ROCKET_INSIDE_PACKET_LETTER,tx_payload,PAYLOAD_SIZE)){
+    comingdata = true;
+  }else{
+    comingdata = false;
+  }
+  //ここから送信処理
+  if (((millis() - latest_send_time) > SEND_PERIOD_MS)&& comingdata) {  //前の送信から一定時間経過しているか
     send_allowed = true;
   }
   if (send_allowed == true) {
@@ -53,3 +54,5 @@ void loop() {
     send_allowed = false;
   }
 }
+
+

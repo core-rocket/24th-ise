@@ -4,9 +4,9 @@
 #define CAN0_CS 0
 #define CAN0_INT 1
 
-#define SEND_PERIOD_MS 1000
+#define PAYLOAD_SIZE 47
+#define ROCKET_INSIDE_PACKET_LETTER 0x4E
 
-E220 e220(0xFF, 0xFF, 0x0A);         //TARGETADRESS=0xFFFF,CHANNEL=0x0A=10ch=ARIB 34-35
 CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
 
 /*E220configuration
@@ -28,8 +28,6 @@ union unionuint32 {
   byte b[4];
 };
 
-
-
 void setup() {
   Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
   Serial.begin(9600);
@@ -39,13 +37,23 @@ void setup() {
 
 void loop() {
   static byte tx_payload[199] = { 0 };
-  static bool send_allowed = false;      //送信許可
+  static byte rocket_inside_packet[200]={0};
   static bool payload_semapho = false;   //payloadの生成が終わるまで送信を許可しない
-  static uint32_t latest_send_time = 0;  //最後に送信した時間
   GeneratePayload(tx_payload, payload_semapho);
-  
-  //ToDO:tx_payloadをMain基板に送信する処理を書く
-  
+  //tx_payloadをMain基板に送信する処理
+  if (payload_semapho == false) {
+    SendMainDataPacket(tx_payload);
+  }
+}
+
+void SendMainDataPacket(byte* _tx_payload){
+  byte rocket_inside_packet[200]={0};
+  rocket_inside_packet[0] = ROCKET_INSIDE_PACKET_LETTER;// Mainマイコンがどっからデータか判断するための識別子
+  for (int i = 0; i < PAYLOAD_SIZE; i++) {
+    rocket_inside_packet[i+1] = _tx_payload[i];
+  }
+  //main基板に送信
+  Serial1.write(rocket_inside_packet, 200);//一個目が識別子，後ろがデータ
 }
 
 void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
