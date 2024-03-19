@@ -2,7 +2,7 @@
 
 #define SEND_PERIOD_MS 1000
 
-E220 e220(Serial1,0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A=10ch=ARIB 34-35
+E220 e220(Serial1, 0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A=10ch=ARIB 34-35
 
 /*E220configuration
 - UARTbaudrate:115200bps
@@ -49,7 +49,7 @@ void loop() {
   static byte rx_payload[199] = { 0 };
   int rssi = 0;
   int Rxlength = 0;
-  Rxlength = e220.ReceiveDataVariebleLength(rx_payload,47,&rssi);//surface6_pressureまでの長さ
+  Rxlength = e220.ReceiveDataVariebleLength(rx_payload, 47, &rssi);  //surface6_pressureまでの長さ
   unionuint32 mcutime_ms;
   byte nose_adc_raw[6] = { 0x00 };
   unionfloat nose_temperature;
@@ -129,14 +129,12 @@ void loop() {
   }
 }
 
-void StatusSerialPrint(byte _status){
+void StatusSerialPrint(byte _status) {
   for (int i = 0; i < 8; i++) {
-    if ((_status >> 7-i)& 0x01) {
+    if ((_status >> 7 - i) & 0x01) {
       Serial.print("1");
     } else {
       Serial.print("0");
     }
   }
 }
-
-

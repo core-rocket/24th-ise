@@ -4,7 +4,7 @@
 
 #define SEND_PERIOD_MS 1000
 
-E220 e220(Serial1,0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A=10ch=ARIB 34-35
+E220 e220(Serial1, 0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A=10ch=ARIB 34-35
 
 /*E220configuration
 - UARTbaudrate:115200bps
@@ -54,7 +54,7 @@ void loop() {
   }
   if (send_allowed == true && payload_semapho == false) {
     Serial.println("send!");
-    e220.TransmissionDataVariebleLength(tx_payload,47);
+    e220.TransmissionDataVariebleLength(tx_payload, 47);
     latest_send_time = millis();  //送信済みの時間を記録
     send_allowed = false;
   }

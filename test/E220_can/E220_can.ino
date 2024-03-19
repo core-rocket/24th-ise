@@ -6,8 +6,8 @@
 
 #define SEND_PERIOD_MS 1000
 
-E220 e220(Serial1,0xFF, 0xFF, 0x00);         //TARGETADRESS=0xFFFF,CHANNEL=0x00
-CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
+E220 e220(Serial1, 0xFF, 0xFF, 0x00);  //TARGETADRESS=0xFFFF,CHANNEL=0x00
+CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);    //CAN
 
 /*E220configuration
 - UARTbaudrate:115200bps
@@ -97,7 +97,7 @@ void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
         status_byte |= 0b00000010;
       }
       break;
-    case CCP_nose_adc://自信ない
+    case CCP_nose_adc:  //自信ない
       //adcの生データを16進数表示の文字列で送信
       for (int i = 0; i < 6; i++) {
         tx_payload[i + 5] = CCP.msg.string_msg.string[i];
@@ -161,7 +161,7 @@ void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
       break;
   }
   for (int i = 0; i < 4; i++) {
-    tx_payload[i] =  mcutime_ms.b[i];
+    tx_payload[i] = mcutime_ms.b[i];
   }
   tx_payload[4] = status_byte;
   _payload_semapho = false;
