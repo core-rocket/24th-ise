@@ -74,30 +74,55 @@ int16_t rssi(char *_rssi_char) {
 }
 
 // GROUND
-// configuration setting is below.
-// -------------------------------------
-// Node                        : EndDevice
-// Band Width                  : 125kHz
-// Spreading Factor            : 11
-// Effective Bitrate           : 537bps
-// Channel                     : 2
-// PAN ID                      : 0001
-// Own Node ID                 : 0001
-// Destination ID              : 0000
-// Acknowledge                 : OFF
-// Retry count                 : 3
-// Transfer Mode               : Payload
-// Receive Node ID information : OFF
-// RSSI information            : ON
-// Config/Operation            : Operation
-// UART baudrate               : 115200
-// Sleep Mode                  : No Sleep
-// Sleep Time                  : 50
-// Output Power                : 13dBm
-// Format                      : ASCII
-// Send Time                   : 0
-// Send Data                   :
-// AES Key                     : 00000000000000000000000000000000
-// RF Mode                     : TxRx
-// Protocol Type               : Private LoRa
-// Rx Boosted                  : ON
+
+// CANVAS
+  // configuration setting is below.
+  // -------------------------------------
+  // Node                        : EndDevice
+  // Band Width                  : 125kHz
+  // Spreading Factor            : 12
+  // Effective Bitrate           : 293bps
+  // Channel                     : 10
+  // PAN ID                      : 0001
+  // Own Node ID                 : 0001
+  // Destination ID              : 0000
+  // Acknowledge                 : OFF
+  // Retry count                 : 0
+  // Transfer Mode               : Payload
+  // Receive Node ID information : OFF
+  // RSSI information            : ON
+  // Config/Operation            : Operation
+  // UART baudrate               : 115200
+  // Sleep Mode                  : No Sleep
+  // Sleep Time                  : 50
+  // Output Power                : 13dBm
+  // Format                      : ASCII
+  // Send Time                   : 0
+  // Send Data                   : 
+  // AES Key                     : 00000000000000000000000000000000
+
+// Pro-e
+  // configuration setting is below.
+  // -------------------------------------
+  // Node                        : EndDevice
+  // Band Width                  : 125kHz
+  // Spreading Factor            : 12
+  // Effective Bitrate           : 293bps
+  // Channel                     : 10
+  // PAN ID                      : 0001
+  // Own Node ID                 : 0002
+  // Destination ID              : 0000
+  // Acknowledge                 : OFF
+  // Retry count                 : 3
+  // Transfer Mode               : Payload
+  // Receive Node ID information : OFF
+  // RSSI information            : ON
+  // Config/Operation            : Operation
+  // UART baudrate               : 115200
+  // Sleep Mode                  : No Sleep
+  // Sleep Time                  : 50
+  // Output Power                : 13dBm
+  // Format                      : ASCII
+  // Send Time                   : 0
+  // Send Data                   : 
+  // AES Key                     : 00000000000000000000000000000000
