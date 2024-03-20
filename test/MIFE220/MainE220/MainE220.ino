@@ -33,19 +33,17 @@ void loop() {
   static bool comingdata = false;        //MIF基板からデータが来ているか
 
   //MIF基板からのデータを受け取ってtx_payloadにいれる処理
+commingdata = false;
+while(Serial1.available() > PAYLOAD_SIZE){
   if (Serial1.read() == ROCKET_INSIDE_PACKET_LETTER) {
     for (int i = 0; i < PAYLOAD_SIZE; i++) {
       tx_payload[i] = Serial1.read();
     }
-    comingdata = true;
-  } else {
-    comingdata = false;
+    commingdata = true;
   }
+}
   //ここから送信処理
-  if (((millis() - latest_send_time) > SEND_PERIOD_MS) && comingdata) {  //前の送信から一定時間経過しているか
-    send_allowed = true;
-  }
-  if (send_allowed == true) {
+  if (commingdata == true) {
     e220.TransmissionDataVariebleLength(tx_payload, PAYLOAD_SIZE);
     latest_send_time = millis();  //送信済みの時間を記録
     send_allowed = false;
