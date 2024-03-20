@@ -37,27 +37,34 @@ void setup() {
 
 void loop() {
   static byte tx_payload[199] = { 0 };
-  static byte rocket_inside_packet[200]={0};
-  static bool payload_semapho = false;   //payloadの生成が終わるまで送信を許可しない
-  GeneratePayload(tx_payload, payload_semapho);
+  static byte rocket_inside_packet[200] = { 0 };
+  static uint32_t last_send_time = 0;
+  bool send_allowed = false;
+
+  GeneratePayload(tx_payload);
   //tx_payloadをMain基板に送信する処理
-  if (payload_semapho == false) {
+  if (millis() - last_send_time > 1000) {
+    send_allowed = true;
+    last_send_time = millis();
+  } else {
+    send_allowed = false;
+  }
+  if (send_allowed == true) {
     SendMainDataPacket(tx_payload);
   }
 }
 
-void SendMainDataPacket(byte* _tx_payload){
-  byte rocket_inside_packet[200]={0};
-  rocket_inside_packet[0] = ROCKET_INSIDE_PACKET_LETTER;// Mainマイコンがどっからデータか判断するための識別子
+void SendMainDataPacket(byte* _tx_payload) {
+  byte rocket_inside_packet[200] = { 0 };
+  rocket_inside_packet[0] = ROCKET_INSIDE_PACKET_LETTER;  // Mainマイコンがどっからデータか判断するための識別子
   for (int i = 0; i < PAYLOAD_SIZE; i++) {
-    rocket_inside_packet[i+1] = _tx_payload[i];
+    rocket_inside_packet[i + 1] = _tx_payload[i];
   }
   //main基板に送信
-  Serial1.write(rocket_inside_packet, 200);//一個目が識別子，後ろがデータ
+  Serial1.write(rocket_inside_packet, 200);  //一個目が識別子，後ろがデータ
 }
 
-void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
-  _payload_semapho = true;
+void GeneratePayload(byte* tx_payload) {
   unionuint32 mcutime_ms;
   unionfloat buf;
   CCP.read_device();
@@ -100,7 +107,7 @@ void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
         status_byte |= 0b00000010;
       }
       break;
-    case CCP_nose_adc://自信ない
+    case CCP_nose_adc:  //自信ない
       //adcの生データを16進数表示の文字列で送信
       for (int i = 0; i < 6; i++) {
         tx_payload[i + 5] = CCP.msg.string_msg.string[i];
@@ -164,8 +171,7 @@ void GeneratePayload(byte* tx_payload, bool _payload_semapho) {
       break;
   }
   for (int i = 0; i < 4; i++) {
-    tx_payload[i] =  mcutime_ms.b[i];
+    tx_payload[i] = mcutime_ms.b[i];
   }
   tx_payload[4] = status_byte;
-  _payload_semapho = false;
 }

@@ -1,16 +1,12 @@
 #include <E220.h>
-#include <CCP.h>
-#include <CCP_MCP2515.h>
-#define CAN0_CS 0
-#define CAN0_INT 1
 
-#define SEND_PERIOD_MS 1000//E220のダウンリンクの周期(ms)
+#define SEND_PERIOD_MS 1000  //E220のダウンリンクの周期(ms)
 
 #define PAYLOAD_SIZE 47
 #define ROCKET_INSIDE_PACKET_LETTER 0x4E
 
-E220 e220(Serial2,0xFF, 0xFF, 0x0A);         //TARGETADRESS=0xFFFF,CHANNEL=0x0A
-CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);  //CAN
+E220 e220(Serial2, 0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A
+CCP_MCP2515 CCP(CAN0_CS, CAN0_INT);    //CAN
 
 
 union unionfloat {
@@ -22,8 +18,6 @@ union unionuint32 {
   byte b[4];
 };
 
-
-
 void setup() {
   Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
   Serial.begin(9600);
@@ -33,26 +27,27 @@ void setup() {
 }
 
 void loop() {
-  static byte tx_payload[199] = { 0 };//MIF基板から送られるbyte配列格納先
+  static byte tx_payload[199] = { 0 };   //MIF基板から送られるbyte配列格納先
   static bool send_allowed = false;      //送信許可
   static uint32_t latest_send_time = 0;  //最後に送信した時間
   static bool comingdata = false;        //MIF基板からデータが来ているか
 
   //MIF基板からのデータを受け取ってtx_payloadにいれる処理
-  if(Serial1.readBytesUntil(ROCKET_INSIDE_PACKET_LETTER,tx_payload,PAYLOAD_SIZE)){
+  if (Serial1.read() == ROCKET_INSIDE_PACKET_LETTER) {
+    for (int i = 0; i < PAYLOAD_SIZE; i++) {
+      tx_payload[i] = Serial1.read();
+    }
     comingdata = true;
-  }else{
+  } else {
     comingdata = false;
   }
   //ここから送信処理
-  if (((millis() - latest_send_time) > SEND_PERIOD_MS)&& comingdata) {  //前の送信から一定時間経過しているか
+  if (((millis() - latest_send_time) > SEND_PERIOD_MS) && comingdata) {  //前の送信から一定時間経過しているか
     send_allowed = true;
   }
   if (send_allowed == true) {
-    e220.TransmissionDataVariebleLength(tx_payload,47);
+    e220.TransmissionDataVariebleLength(tx_payload, PAYLOAD_SIZE);
     latest_send_time = millis();  //送信済みの時間を記録
     send_allowed = false;
   }
 }
-
-
