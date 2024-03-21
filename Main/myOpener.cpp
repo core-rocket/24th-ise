@@ -79,11 +79,11 @@ void MY_OPENER::init() {
 void MY_OPENER::open() {
   //servo1.write(93);
   //servo2.write(93);
-  Servo_write(SERVO_1, 9);
+  Servo_write(SERVO_1, 5);
 }
 
 void MY_OPENER::close() {
   //servo1.write(30);
   //servo2.write(30);
-  Servo_write(SERVO_1, -53);
+  Servo_write(SERVO_1, -60);
 }
