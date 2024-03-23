@@ -369,7 +369,7 @@ void loop() {
   }
   if (uplink == "flash-stop") {
     Serial_MIF.print("flash-stop\n");
-  } 
+  }
   if (uplink == "flash-clear") {
     Serial_MIF.print("flash-clear\n");
   }
