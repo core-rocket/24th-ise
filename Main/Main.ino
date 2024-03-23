@@ -66,6 +66,27 @@ bool need_response_usb = false;
 bool need_response_es920 = false;
 
 // W25Q128
+#include <SPI.h>
+#include "SdFat.h"
+#include "Adafruit_SPIFlash.h"
+#define EXTERNAL_FLASH_USE_CS 17
+#define EXTERNAL_FLASH_USE_SPI SPI
+Adafruit_FlashTransport_SPI flashTransport(EXTERNAL_FLASH_USE_CS, EXTERNAL_FLASH_USE_SPI);
+Adafruit_SPIFlash flash(&flashTransport);
+FatVolume fatfs;
+File32 dataFile;
+#include "pico/multicore.h"
+#define SD_BUF_SIZE 4096
+char SD_buf[2][SD_BUF_SIZE];
+size_t SD_buf_count[2] = { 0, 0 };
+static semaphore_t sem_core1_using_buf_A;
+static semaphore_t sem_core1_using_buf_B;
+static semaphore_t sem_need_format;
+#define FILE_NAME "log.csv"
+#include "ff.h"
+#include "diskio.h"
+// up to 11 characters
+#define DISK_LABEL "EXT FLASH"
 
 // Opener
 #include "myOpener.h"
@@ -80,6 +101,9 @@ SerialPIO Serial_MIF(MIF_TX, MIF_RX, 256);
 
 // setup()ではdelay()使用可
 void setup() {
+  sem_init(&sem_core1_using_buf_A, 1, 1);
+  sem_init(&sem_core1_using_buf_B, 1, 1);
+
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
@@ -96,7 +120,7 @@ void setup() {
   delay(25);
   uint8_t savePageID = bno.read8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR);
   bno.write8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR, 0X01);
-  bno.write8(Adafruit_BNO055::BNO055_ACCEL_DATA_X_LSB_ADDR, 0X17); // page2なのでホントはACC_DATA_X_LSBではなくACC_DATA_X_LSBにアクセス
+  bno.write8(Adafruit_BNO055::BNO055_ACCEL_DATA_X_LSB_ADDR, 0X17);  // page2なのでホントはACC_DATA_X_LSBではなくACC_DATA_X_LSBにアクセス
   delay(10);
   bno.write8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR, savePageID);
   bno.setMode(OPERATION_MODE_ACCONLY);
@@ -139,6 +163,14 @@ void loop() {
   static uint32_t time_100Hz = 0;
   if (millis() - time_100Hz >= 10) {
     time_100Hz += 10;
+
+    char downlink_char[100];
+    downlink += ",";
+    downlink += millis();
+    downlink.toCharArray(downlink_char, 100);
+    write_flash_buf(downlink_char);
+    char lf[] = "\n";
+    write_flash_buf(lf);
 
     static int count_10Hz = 0;
     count_10Hz++;
@@ -353,11 +385,268 @@ void loop() {
     Serial_MIF.print("mif-off\n");
   }
 
+  if (uplink == "mem-dump") {
+    memory_dump();
+  }
+  if (uplink == "mem-format") {
+    memory_format();
+  }
+
   float uplink_float = uplink.toFloat();
   if (uplink_float != 0) {
     opener.set_open_threshold_time_ms(uplink_float * 1000);
-    response = "open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2);
-    need_response_usb = true;
-    need_response_es920 = true;
+    set_response("open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2));
+  }
+}
+
+void set_response(String str) {
+  response = str;
+  need_response_usb = true;
+  need_response_es920 = true;
+}
+
+void write_flash_buf(char str[]) {
+  size_t str_len = strlen(str);
+  bool use_buf_A = sem_try_acquire(&sem_core1_using_buf_A);  // sem_core1_using_buf_Aが取れる = core1はAを使ってない = core0はAを使う
+  bool use_buf_B = sem_try_acquire(&sem_core1_using_buf_B);
+  size_t SD_buf_index;
+  if (use_buf_A) {
+    SD_buf_index = 0;
+  } else if (use_buf_B) {
+    SD_buf_index = 1;
+  } else {
+    //Serial.println("lock");
+    return;
+  }
+  memcpy((void *)&SD_buf[SD_buf_index][SD_buf_count[SD_buf_index]], (void *)str, str_len * sizeof(char));
+  if (SD_buf_count[SD_buf_index] < SD_BUF_SIZE - str_len) {
+    SD_buf_count[SD_buf_index] += str_len;
+  } else {
+    //Serial.println("overflow");
+  }
+  if (use_buf_A) {
+    sem_release(&sem_core1_using_buf_A);
+  }
+  if (use_buf_B) {
+    sem_release(&sem_core1_using_buf_B);
+  }
+}
+
+void setup1() {
+  // Init external flash
+  flash.begin();
+
+  // Open file system on the flash
+  while (!fatfs.begin(&flash)) {
+    Serial.println("Error: filesystem is not existed. Please try SdFat_format "
+                   "example to make one.");
+    delay(1000);
+  }
+
+  dataFile = fatfs.open(FILE_NAME, FILE_WRITE);
+}
+
+void loop1() {
+  // Serial.print("loop1 running...");
+
+  sem_acquire_blocking(&sem_core1_using_buf_A);
+
+
+  if (!dataFile) {
+    dataFile = fatfs.open(FILE_NAME, FILE_WRITE);
+  }
+  if (dataFile) {
+    dataFile.write((char *)SD_buf[0], sizeof(char) * (SD_buf_count[0]));
+    dataFile.close();
+    Serial.print("bufA size: ");
+    Serial.println(SD_buf_count[0]);
+    SD_buf_count[0] = 0;
+  } else {
+    Serial.println("error opening log.csv");
+  }
+
+  sem_release(&sem_core1_using_buf_A);
+
+  sem_acquire_blocking(&sem_core1_using_buf_B);
+
+  if (!dataFile) {
+    dataFile = fatfs.open(FILE_NAME, FILE_WRITE);
+  }
+  if (dataFile) {
+    dataFile.write((char *)SD_buf[1], sizeof(char) * (SD_buf_count[1]));
+    dataFile.flush();
+    dataFile.close();
+    Serial.print("bufB size: ");
+    Serial.println(SD_buf_count[1]);
+    SD_buf_count[1] = 0;
+  } else {
+    Serial.println("error opening log.csv");
+  }
+
+  sem_release(&sem_core1_using_buf_B);
+}
+
+void memory_dump() {
+  // block loop1
+  sem_acquire_blocking(&sem_core1_using_buf_A);
+  sem_acquire_blocking(&sem_core1_using_buf_B);
+
+  if (!dataFile) {
+    dataFile = fatfs.open(FILE_NAME);
+  }
+  if (dataFile) {
+    Serial.println("log.csv:");
+    while (dataFile.available()) {
+      Serial.write(dataFile.read());
+      delayMicroseconds(1);
+    }
+    dataFile.close();
+  } else {
+    Serial.println("error opening log.csv");
+  }
+
+  sem_release(&sem_core1_using_buf_A);
+  sem_release(&sem_core1_using_buf_B);
+}
+
+void memory_format() {
+  // block loop1
+  sem_acquire_blocking(&sem_core1_using_buf_A);
+  sem_acquire_blocking(&sem_core1_using_buf_B);
+
+  if (dataFile) {
+    dataFile.close();
+  }
+  fatfs.end();
+  format_fat12();
+  check_fat12();
+
+  SD_buf_count[0] = 0;
+  SD_buf_count[1] = 0;
+  sem_release(&sem_core1_using_buf_A);
+  sem_release(&sem_core1_using_buf_B);
+}
+
+
+void format_fat12(void) {
+// Working buffer for f_mkfs.
+#ifdef __AVR__
+  uint8_t workbuf[512];
+#else
+  uint8_t workbuf[4096];
+#endif
+
+  // Elm Cham's fatfs objects
+  FATFS elmchamFatfs;
+
+  // Make filesystem.
+  Serial.print(F("Make filesystem."));
+  FRESULT r = f_mkfs("", FM_FAT, 0, workbuf, sizeof(workbuf));
+  if (r != FR_OK) {
+    Serial.print(F("Error, f_mkfs failed with error code: "));
+    Serial.println(r, DEC);
+    while (1) yield();
+  }
+
+  // mount to set disk label
+  Serial.print(F("mount to set disk label"));
+  r = f_mount(&elmchamFatfs, "0:", 1);
+  if (r != FR_OK) {
+    Serial.print(F("Error, f_mount failed with error code: "));
+    Serial.println(r, DEC);
+    while (1) yield();
+  }
+
+  // Setting label
+  Serial.println(F("Setting disk label to: " DISK_LABEL));
+  r = f_setlabel(DISK_LABEL);
+  if (r != FR_OK) {
+    Serial.print(F("Error, f_setlabel failed with error code: "));
+    Serial.println(r, DEC);
+    while (1) yield();
+  }
+
+  // unmount
+  Serial.println(F("unmount"));
+  f_unmount("0:");
+
+  // sync to make sure all data is written to flash
+  Serial.println(F("sync to make sure all data is written to flash"));
+  flash.syncBlocks();
+
+  Serial.println(F("Formatted flash!"));
+}
+
+void check_fat12(void) {
+  // Check new filesystem
+  while (!fatfs.begin(&flash)) {
+    Serial.println(F("Error, failed to mount newly formatted filesystem!"));
+    delay(1000);
+  }
+}
+
+
+//--------------------------------------------------------------------+
+// fatfs diskio
+//--------------------------------------------------------------------+
+extern "C" {
+
+  DSTATUS disk_status(BYTE pdrv) {
+    (void)pdrv;
+    return 0;
+  }
+
+  DSTATUS disk_initialize(BYTE pdrv) {
+    (void)pdrv;
+    return 0;
+  }
+
+  DRESULT disk_read(
+    BYTE pdrv,    /* Physical drive nmuber to identify the drive */
+    BYTE *buff,   /* Data buffer to store read data */
+    DWORD sector, /* Start sector in LBA */
+    UINT count    /* Number of sectors to read */
+  ) {
+    (void)pdrv;
+    return flash.readBlocks(sector, buff, count) ? RES_OK : RES_ERROR;
+  }
+
+  DRESULT disk_write(
+    BYTE pdrv,        /* Physical drive nmuber to identify the drive */
+    const BYTE *buff, /* Data to be written */
+    DWORD sector,     /* Start sector in LBA */
+    UINT count        /* Number of sectors to write */
+  ) {
+    (void)pdrv;
+    return flash.writeBlocks(sector, buff, count) ? RES_OK : RES_ERROR;
+  }
+
+  DRESULT disk_ioctl(
+    BYTE pdrv, /* Physical drive nmuber (0..) */
+    BYTE cmd,  /* Control code */
+    void *buff /* Buffer to send/receive control data */
+  ) {
+    (void)pdrv;
+
+    switch (cmd) {
+      case CTRL_SYNC:
+        flash.syncBlocks();
+        return RES_OK;
+
+      case GET_SECTOR_COUNT:
+        *((DWORD *)buff) = flash.size() / 512;
+        return RES_OK;
+
+      case GET_SECTOR_SIZE:
+        *((WORD *)buff) = 512;
+        return RES_OK;
+
+      case GET_BLOCK_SIZE:
+        *((DWORD *)buff) = 8;  // erase block size in units of sector size
+        return RES_OK;
+
+      default:
+        return RES_PARERR;
+    }
   }
 }
