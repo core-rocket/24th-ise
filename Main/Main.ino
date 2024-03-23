@@ -129,7 +129,7 @@ void setup() {
 
   Serial_GNSS.begin(9600);
   Serial_Valve.begin(115200);
-  Serial_MIF.begin(115200);
+  Serial_MIF.begin(921600);
 
   opener.init();
 }
@@ -219,6 +219,13 @@ void loop() {
     data_bme_altitude_m = bme.readAltitude(SEALEVELPRESSURE_HPA);
 
     bool new_judge = opener.opener_100Hz(-data_bno_accel_z_mss, data_bme_altitude_m);
+    downlink += data_bno_accel_y_mss;
+    downlink += data_bno_accel_z_mss;
+
+    downlink += data_bme_pressure_hPa;
+    downlink += data_bme_temperature_degC;
+
+    Serial_MIF.println(downlink);
   }
 
 
