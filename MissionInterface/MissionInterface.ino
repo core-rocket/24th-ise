@@ -17,6 +17,9 @@ CCP_MCP2515 CCP(CAN_CS, CAN_INT);
 #include <W25Q512.h>
 #include "Queue.h"
 W25Q512 flash(SPI, FLASH_CS);
+static uint8_t flash_buf[256];
+static size_t flash_index = 0;
+static uint32_t flash_addr = 0;
 
 typedef enum {
   SLEEP,
@@ -58,9 +61,6 @@ void setup() {
 }
 
 void flash_print(char str[]) {
-  static uint8_t flash_buf[256];
-  static size_t flash_index = 0;
-  static uint32_t flash_addr = 0;
 
   // Serial.print("flash_addr: ");
   // Serial.println(flash_addr);
@@ -133,6 +133,8 @@ void loop() {
     } else if (data_str == "flash-clear") {
       flash.chipErase(false);  // non-blocking
       flash_mode = CLEARING;
+      flash_index = 0;
+      flash_addr = 0;
     } else {
       data_str += "\n";
       data_str.toCharArray(data_char, 256);
