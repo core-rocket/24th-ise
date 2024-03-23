@@ -62,6 +62,13 @@ void flash_print(char str[]) {
   static size_t flash_index = 0;
   static uint32_t flash_addr = 0;
 
+  // Serial.print("flash_addr: ");
+  // Serial.println(flash_addr);
+
+  if (flash_mode != ACTIVE) {
+    return;
+  }
+
   size_t len = strlen(str);
   for (size_t i = 0; i < len; i++) {
     flash_buf[flash_index] = str[i];
@@ -78,9 +85,9 @@ void flash_print(char str[]) {
 }
 
 void flash_dump() {
-  static uint8_t flash_buf[256];
-  static size_t flash_index = 0;
-  static uint32_t flash_addr = 0;
+  uint8_t flash_buf[256];
+  size_t flash_index = 0;
+  uint32_t flash_addr = 0;
 
   while (true) {
     flash.read(flash_addr, flash_buf, 256);
