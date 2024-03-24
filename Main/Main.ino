@@ -96,7 +96,7 @@ void setup() {
   delay(25);
   uint8_t savePageID = bno.read8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR);
   bno.write8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR, 0X01);
-  bno.write8(Adafruit_BNO055::BNO055_ACCEL_DATA_X_LSB_ADDR, 0X17); // page2なのでホントはACC_DATA_X_LSBではなくACC_DATA_X_LSBにアクセス
+  bno.write8(Adafruit_BNO055::BNO055_ACCEL_DATA_X_LSB_ADDR, 0X17);  // page2なのでホントはACC_DATA_X_LSBではなくACC_DATA_X_LSBにアクセス
   delay(10);
   bno.write8(Adafruit_BNO055::BNO055_PAGE_ID_ADDR, savePageID);
   bno.setMode(OPERATION_MODE_ACCONLY);
@@ -129,7 +129,7 @@ void setup() {
 
   Serial_GNSS.begin(9600);
   Serial_Valve.begin(115200);
-  Serial_MIF.begin(115200);
+  Serial_MIF.begin(921600);
 
   opener.init();
 }
@@ -219,6 +219,20 @@ void loop() {
     data_bme_altitude_m = bme.readAltitude(SEALEVELPRESSURE_HPA);
 
     bool new_judge = opener.opener_100Hz(-data_bno_accel_z_mss, data_bme_altitude_m);
+    downlink += ",";
+    downlink += data_bno_accel_y_mss;
+    downlink += ",";
+    downlink += data_bno_accel_z_mss;
+    downlink += ",";
+
+    downlink += data_bme_pressure_hPa;
+    downlink += ",";
+    downlink += data_bme_temperature_degC;
+    downlink += ",";
+
+    Serial_MIF.print(millis());
+    Serial_MIF.print(",");
+    Serial_MIF.println(downlink);
   }
 
 
@@ -351,6 +365,15 @@ void loop() {
   }
   if (uplink == "mif-off") {
     Serial_MIF.print("mif-off\n");
+  }
+  if (uplink == "flash-start") {
+    Serial_MIF.print("flash-start\n");
+  }
+  if (uplink == "flash-stop") {
+    Serial_MIF.print("flash-stop\n");
+  }
+  if (uplink == "flash-clear") {
+    Serial_MIF.print("flash-clear\n");
   }
 
   float uplink_float = uplink.toFloat();
