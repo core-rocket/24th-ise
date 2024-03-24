@@ -65,6 +65,9 @@ String response = "";
 bool need_response_usb = false;
 bool need_response_es920 = false;
 
+// E220
+SerialPIO Serial_E220(E220_TX, E220_RX, 256);
+
 // W25Q128
 
 // Opener
@@ -130,6 +133,7 @@ void setup() {
   Serial_GNSS.begin(9600);
   Serial_Valve.begin(115200);
   Serial_MIF.begin(921600);
+  Serial_E220.begin(115200);
 
   opener.init();
 }
@@ -252,6 +256,10 @@ void loop() {
     valve_mode = Serial_Valve.read();
   }
 
+  // E220パススルー
+  while(Serial_MIF.available()){
+    Serial_E220.write(Serial_MIF.read());
+  }
 
   // テレメトリ生成
   downlink = "";
