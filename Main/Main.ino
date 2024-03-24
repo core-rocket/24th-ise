@@ -362,25 +362,34 @@ void loop() {
 
   if (uplink == "mif-on") {
     Serial_MIF.print("mif-on\n");
+    set_response("on");
   }
   if (uplink == "mif-off") {
     Serial_MIF.print("mif-off\n");
+    set_response("off");
   }
   if (uplink == "flash-start") {
     Serial_MIF.print("flash-start\n");
+    set_response("start");
   }
   if (uplink == "flash-stop") {
     Serial_MIF.print("flash-stop\n");
+    set_response("stop");
   }
   if (uplink == "flash-clear") {
     Serial_MIF.print("flash-clear\n");
+    set_response("clear");
   }
 
   float uplink_float = uplink.toFloat();
   if (uplink_float != 0) {
     opener.set_open_threshold_time_ms(uplink_float * 1000);
-    response = "open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2);
-    need_response_usb = true;
-    need_response_es920 = true;
+    set_response("open:" + String(static_cast<float>(opener.get_open_threshold_time_ms()) / 1000.0, 2));
   }
+}
+
+void set_response(String str) {
+  response = str;
+  need_response_usb = true;
+  need_response_es920 = true;
 }
