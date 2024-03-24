@@ -41,7 +41,8 @@ void setup() {
 
   pinMode(MISSION_POWER, OUTPUT);
   digitalWrite(MISSION_POWER, LOW);
-
+  
+  Serial1.setFIFOSize(512);
   Serial1.begin(921600);
   while (Serial1.available()) {
     Serial1.read();
