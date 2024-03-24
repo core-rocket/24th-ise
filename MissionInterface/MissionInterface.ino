@@ -10,6 +10,31 @@
 #define LED_G 16
 #define LED_B 25
 
+// E220
+#include <E220.h>
+#define PAYLOAD_SIZE 55
+E220 e220(Serial1, 0xFF, 0xFF, 0x0A);  //TARGETADRESS=0xFFFF,CHANNEL=0x0A
+/*E220configuration
+- UARTbaudrate:115200bps
+- bandwith: 250kHz//審査書の値なので運営からの指示以外変更禁止
+- channel: 0x0A(ARIB 34-35)//審査書の値なので運営からの指示以外変更禁止
+- target address: 0xFFFF(broradcast)
+- power: 13dBm
+- SF: 11
+*/
+union unionfloat {
+  float f;
+  byte b[4];
+};
+union unionuint32 {
+  uint32_t i;
+  byte b[4];
+};
+unionuint32 mcutime_ms;
+unionfloat buf;
+uint8_t status_byte = 0x00;
+uint8_t tx_payload[199] = { 0 };
+
 // CAN
 CCP_MCP2515 CCP(CAN_CS, CAN_INT);
 
@@ -42,6 +67,7 @@ void setup() {
   pinMode(MISSION_POWER, OUTPUT);
   digitalWrite(MISSION_POWER, LOW);
 
+  Serial1.setFIFOSize(512);  //E220のサブパケ200byteより大きいサイズにする
   Serial1.begin(921600);
   while (Serial1.available()) {
     Serial1.read();
@@ -51,6 +77,8 @@ void setup() {
   CCP.begin();
 
   flash.begin();
+
+  reset_tx_payload();
 
   pinMode(LED_R, OUTPUT);
   pinMode(LED_G, OUTPUT);
@@ -175,5 +203,143 @@ void loop() {
       snprintf(msgString, sizeof(msgString), "%d,ID,%03x,time,%d000,fp16_0,%8.2f,fp16_1,%8.2f,fp16_2,%8.2f", millis(), CCP.id, CCP.time16(), CCP.data_fp16_0(), CCP.data_fp16_1(), CCP.data_fp16_2());
     }
     Serial.println(msgString);
+
+
+    switch (CCP.id) {
+      case CCP_nose_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b10000000;
+        }
+        break;
+      case CCP_surface_pressure1_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b01000000;
+        }
+        break;
+      case CCP_surface_pressure2_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b00100000;
+        }
+        break;
+      case CCP_surface_pressure3_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b00010000;
+        }
+        break;
+      case CCP_surface_pressure4_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b00001000;
+        }
+        break;
+      case CCP_surface_pressure5_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b00000100;
+        }
+        break;
+      case CCP_surface_pressure6_status:
+        if (CCP.str_match("OK", 2)) {
+          status_byte |= 0b00000010;
+        }
+        break;
+      case CCP_nose_adc:  //自信ない
+        //adcの生データを16進数表示の文字列で送信
+        for (int i = 0; i < 6; i++) {
+          tx_payload[i + 5] = CCP.msg.string_msg.string[i];
+        }
+        break;
+      case CCP_nose_temperature:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 11] = buf.b[i];
+        }
+        break;
+      case CCP_nose_barometic_pressure:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 15] = buf.b[i];
+        }
+        break;
+      case CCP_nose_voltage:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 19] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure1_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 23] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure2_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 27] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure3_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 31] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure4_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 35] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure5_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 39] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure6_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 43] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure7_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 47] = buf.b[i];
+        }
+        break;
+      case CCP_surface_pressure8_pressure_pa:
+        buf.f = CCP.data_float();
+        for (int i = 0; i < 4; i++) {
+          tx_payload[i + 51] = buf.b[i];
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  mcutime_ms.i = millis();
+  for (int i = 0; i < 4; i++) {
+    tx_payload[i] = mcutime_ms.b[i];
+  }
+  status_byte = 0x00;
+  tx_payload[4] = status_byte;
+
+  static uint32_t last_send_time = 0;
+  if (millis() - last_send_time >= 1000) {
+    last_send_time = millis();
+    e220.TransmissionDataVariebleLength(tx_payload, PAYLOAD_SIZE);
+  }
+}
+
+void reset_tx_payload() {
+  for (int i = 0; i < 11; i++) {
+    tx_payload[i] = 0;
+  }
+  buf.f = 0;
+  for (int data = 0; data < 11; data++) {
+    for (int i = 0; i < 4; i++) {
+      tx_payload[i + 11 + (4 * data)] = buf.b[i];
+    }
   }
 }
