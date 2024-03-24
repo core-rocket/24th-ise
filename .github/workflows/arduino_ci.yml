@@ -113,6 +113,8 @@ jobs:
           version: latest
         - name: Adafruit LPS35HW
           version: latest
+        - name: E220-900T22S-JP
+          version: 2.0.2
         - source-url: https://github.com/uChip/MCP342X.git
         - source-url: https://github.com/core-rocket/CCP.git
         - source-url: https://github.com/core-rocket/Opener.git
