@@ -57,6 +57,18 @@ Flash_Mode flash_mode = SLEEP;
 char msgString[128];
 char str_buf[7];  // 6+\0
 
+float nose_temperature = 0;
+float nose_barometic_presure = 0;
+float nose_voltage = 0;
+float surface1_pressure = 0;
+float surface2_pressure = 0;
+float surface3_pressure = 0;
+float surface4_pressure = 0;
+float surface5_pressure = 0;
+float surface6_pressure = 0;
+float surface7_pressure = 0;
+float surface8_pressure = 0;
+
 void setup() {
   delay(500);
   Serial.begin(115200);
@@ -164,7 +176,28 @@ void loop() {
       flash_index = 0;
       flash_addr = 0;
     } else {
-      data_str += "\n";
+      data_str += String(nose_temperature, 2);
+      data_str += ",";
+      data_str += String(nose_barometic_presure, 2);
+      data_str += ",";
+      data_str += String(nose_voltage, 2);
+      data_str += ",";
+      data_str += String(surface1_pressure, 2);
+      data_str += ",";
+      data_str += String(surface2_pressure, 2);
+      data_str += ",";
+      data_str += String(surface3_pressure, 2);
+      data_str += ",";
+      data_str += String(surface4_pressure, 2);
+      data_str += ",";
+      data_str += String(surface5_pressure, 2);
+      data_str += ",";
+      data_str += String(surface6_pressure, 2);
+      data_str += ",";
+      data_str += String(surface7_pressure, 2);
+      data_str += ",";
+      data_str += String(surface8_pressure, 2);
+      data_str += ",";
       data_str.toCharArray(data_char, 256);
       flash_print(data_char);
     }
@@ -265,49 +298,49 @@ void loop() {
           tx_payload[i + 19] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure1_pressure_pa:
+      case CCP_surface_pressure1_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 23] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure2_pressure_pa:
+      case CCP_surface_pressure2_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 27] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure3_pressure_pa:
+      case CCP_surface_pressure3_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 31] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure4_pressure_pa:
+      case CCP_surface_pressure4_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 35] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure5_pressure_pa:
+      case CCP_surface_pressure5_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 39] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure6_pressure_pa:
+      case CCP_surface_pressure6_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 43] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure7_pressure_pa:
+      case CCP_surface_pressure7_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 47] = buf.b[i];
         }
         break;
-      case CCP_surface_pressure8_pressure_pa:
+      case CCP_surface_pressure8_pressure_hPa:
         buf.f = CCP.data_float();
         for (int i = 0; i < 4; i++) {
           tx_payload[i + 51] = buf.b[i];
