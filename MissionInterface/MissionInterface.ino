@@ -180,7 +180,7 @@ void loop() {
       data_str += ",";
       data_str += String(nose_barometic_presure, 2);
       data_str += ",";
-      data_str += String(nose_voltage, 2);
+      data_str += String(nose_voltage, 4);
       data_str += ",";
       data_str += String(surface1_pressure, 2);
       data_str += ",";
