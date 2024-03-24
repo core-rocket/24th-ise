@@ -69,7 +69,7 @@ bool need_response_es920 = false;
 
 // Opener
 #include "myOpener.h"
-MY_OPENER opener(OPENER::SHINSASYO);
+MY_OPENER opener(OPENER::FM);
 
 // Valve
 char valve_mode = '/';

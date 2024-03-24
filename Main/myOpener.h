@@ -30,7 +30,7 @@ public:
     flight_judgement_duration_ms = ACC_threshold_count * 100;
 
     fm_lift_off_threshold_altitude_m = 1.0;
-    fm_lift_off_threshold_ac_mss = 25.0;
+    fm_lift_off_threshold_ac_mss = 20.0;
     fm_ALT_oversampling_count = 1;
     fm_ALT_threshold_count = ACC_threshold_count;
 
@@ -42,7 +42,7 @@ public:
     //! 離床判定後，燃焼中と判断し開放判定を行わない時間[ms]
     meco_threshold_time_ms = 5000;
     //! 開放機構の動作にかかる時間を引いた，離床から開放までの時間のシム値[ms]の初期値
-    open_threshold_time_ms = 13000;
+    open_threshold_time_ms = 12000;
 
     //! パラメータをFMと審査書で切り替える
     switch_parameter(setting);
