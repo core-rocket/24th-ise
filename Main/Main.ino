@@ -220,15 +220,12 @@ void loop() {
 
     bool new_judge = opener.opener_100Hz(-data_bno_accel_z_mss, data_bme_altitude_m);
     downlink += ",";
-    downlink += data_bno_accel_y_mss;
+    downlink += data_bno_accel_x_mss;
     downlink += ",";
-    downlink += data_bno_accel_z_mss;
+    downlink += data_bno_accel_y_mss;
     downlink += ",";
 
     downlink += data_bme_pressure_hPa;
-    downlink += ",";
-    downlink += data_bme_temperature_degC;
-    downlink += ",";
 
     Serial_MIF.print(millis());
     Serial_MIF.print(",");

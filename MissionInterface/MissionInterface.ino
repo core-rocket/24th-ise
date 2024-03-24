@@ -41,7 +41,7 @@ void setup() {
 
   pinMode(MISSION_POWER, OUTPUT);
   digitalWrite(MISSION_POWER, LOW);
-  
+
   Serial1.setFIFOSize(512);
   Serial1.begin(921600);
   while (Serial1.available()) {
@@ -89,6 +89,8 @@ void flash_dump() {
   uint8_t flash_buf[256];
   size_t flash_index = 0;
   uint32_t flash_addr = 0;
+
+  Serial.println("time_ms, state, accel_z_mss, temperature_degC, altitude_m, gnss_latitude_udeg, gnss_longitude_udeg, bat_v, ext_v, accel_x_mss, accel_y_mss, pressure_hPa");
 
   while (true) {
     flash.read(flash_addr, flash_buf, 256);
