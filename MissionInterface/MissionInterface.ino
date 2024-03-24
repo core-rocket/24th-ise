@@ -197,7 +197,7 @@ void loop() {
       data_str += String(surface7_pressure, 2);
       data_str += ",";
       data_str += String(surface8_pressure, 2);
-      data_str += ",";
+      data_str += ",\n";
       data_str.toCharArray(data_char, 256);
       flash_print(data_char);
     }
